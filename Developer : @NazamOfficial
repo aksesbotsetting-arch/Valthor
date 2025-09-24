@@ -1,37 +1,51 @@
--- Buat GUI utama
+-- // Services
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
+
+-- // ScreenGui
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CoolUI"
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+ScreenGui.Name = "PremiumUI"
+ScreenGui.Parent = PlayerGui
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 ScreenGui.ResetOnSpawn = false
 
--- Frame utama
+-- // Blur efek belakang
+local blur = Instance.new("BlurEffect")
+blur.Size = 0
+blur.Parent = Lighting
+
+-- // Frame utama
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 300, 0, 180)
-MainFrame.Position = UDim2.new(0.35, 0, 0.3, 0)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+MainFrame.Size = UDim2.new(0, 420, 0, 280)
+MainFrame.Position = UDim2.new(0.5, -210, 0.5, -140)
+MainFrame.BackgroundColor3 = Color3.fromRGB(60, 60, 60) -- abu dominan
+MainFrame.BackgroundTransparency = 0
+MainFrame.Visible = false
 MainFrame.Active = true
 MainFrame.Draggable = true
 MainFrame.Parent = ScreenGui
 
--- Rounded corner
+-- Rounded Corner
 local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0,20)
+UICorner.CornerRadius = UDim.new(0, 18)
 UICorner.Parent = MainFrame
 
--- UIStroke Glow
+-- Stroke border
 local Stroke = Instance.new("UIStroke")
 Stroke.Thickness = 2
-Stroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-Stroke.Color = Color3.fromRGB(255,255,255)
+Stroke.Color = Color3.fromRGB(220, 220, 220)
 Stroke.Parent = MainFrame
 
 -- Gradient background
 local Gradient = Instance.new("UIGradient")
 Gradient.Color = ColorSequence.new{
-	ColorSequenceKeypoint.new(0, Color3.fromRGB(0,0,0)),
-	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(120,120,120)),
-	ColorSequenceKeypoint.new(1, Color3.fromRGB(255,255,255))
+	ColorSequenceKeypoint.new(0, Color3.fromRGB(30,30,30)),
+	ColorSequenceKeypoint.new(0.5, Color3.fromRGB(90,90,90)),
+	ColorSequenceKeypoint.new(1, Color3.fromRGB(200,200,200))
 }
 Gradient.Rotation = 0
 Gradient.Parent = MainFrame
@@ -39,39 +53,106 @@ Gradient.Parent = MainFrame
 -- Title
 local Title = Instance.new("TextLabel")
 Title.Parent = MainFrame
-Title.Size = UDim2.new(1,0,0,50)
+Title.Size = UDim2.new(1, -40, 0, 40)
+Title.Position = UDim2.new(0, 15, 0, 5)
 Title.BackgroundTransparency = 1
 Title.Font = Enum.Font.GothamBold
-Title.Text = "⚪ UI KEREN ⚫"
+Title.Text = "⚫ Premium Menu ⚪"
 Title.TextSize = 26
-Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.TextColor3 = Color3.fromRGB(240, 240, 240)
+Title.TextXAlignment = Enum.TextXAlignment.Left
 
--- Efek shimmer pada title
+-- Title stroke
 local TitleStroke = Instance.new("UIStroke")
-TitleStroke.Thickness = 1.5
+TitleStroke.Thickness = 1.2
 TitleStroke.Color = Color3.fromRGB(200,200,200)
 TitleStroke.Parent = Title
 
--- Animasi breathing (zoom in-out halus)
+-- Close Button (X)
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Parent = MainFrame
+CloseBtn.Size = UDim2.new(0, 35, 0, 35)
+CloseBtn.Position = UDim2.new(1, -45, 0, 5)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.Text = "X"
+CloseBtn.TextSize = 22
+CloseBtn.TextColor3 = Color3.fromRGB(255,255,255)
+
+local cornerClose = Instance.new("UICorner")
+cornerClose.CornerRadius = UDim.new(0,10)
+cornerClose.Parent = CloseBtn
+
+-- Tombol kecil muncul kalau ditutup
+local MiniBtn = Instance.new("TextButton")
+MiniBtn.Parent = ScreenGui
+MiniBtn.Size = UDim2.new(0, 60, 0, 60)
+MiniBtn.Position = UDim2.new(0, 20, 0.8, 0)
+MiniBtn.BackgroundColor3 = Color3.fromRGB(40,40,40)
+MiniBtn.Font = Enum.Font.GothamBold
+MiniBtn.Text = "UI"
+MiniBtn.TextSize = 22
+MiniBtn.TextColor3 = Color3.fromRGB(255,255,255)
+MiniBtn.Visible = true
+MiniBtn.Active = true
+MiniBtn.Draggable = true
+
+local miniCorner = Instance.new("UICorner")
+miniCorner.CornerRadius = UDim.new(1,0)
+miniCorner.Parent = MiniBtn
+
+-- // Animasi Show UI
+local function ShowUI()
+	MainFrame.Visible = true
+	MainFrame.Size = UDim2.new(0, 0, 0, 0)
+	blur.Size = 0
+
+	-- Blur in
+	TweenService:Create(blur, TweenInfo.new(0.5, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = 12}):Play()
+
+	-- Expand animasi
+	TweenService:Create(MainFrame, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0, 420, 0, 280)}):Play()
+end
+
+-- // Animasi Hide UI
+local function HideUI()
+	-- Blur out
+	TweenService:Create(blur, TweenInfo.new(0.4, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = 0}):Play()
+
+	-- Shrink animasi
+	local tween = TweenService:Create(MainFrame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0, 0, 0, 0)})
+	tween:Play()
+	tween.Completed:Wait()
+	MainFrame.Visible = false
+end
+
+-- // Tombol X dan UI Button
+CloseBtn.MouseButton1Click:Connect(function()
+	HideUI()
+end)
+
+MiniBtn.MouseButton1Click:Connect(function()
+	ShowUI()
+end)
+
+-- Efek breathing halus
 task.spawn(function()
 	while true do
-		game:GetService("TweenService"):Create(
-			MainFrame, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
-			{Size = UDim2.new(0, 310, 0, 190)}
-		):Play()
-		wait(2)
-		game:GetService("TweenService"):Create(
-			MainFrame, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out),
-			{Size = UDim2.new(0, 300, 0, 180)}
-		):Play()
-		wait(2)
+		if MainFrame.Visible then
+			TweenService:Create(MainFrame, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = UDim2.new(0, 430, 0, 290)}):Play()
+			wait(2)
+			TweenService:Create(MainFrame, TweenInfo.new(2, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = UDim2.new(0, 420, 0, 280)}):Play()
+			wait(2)
+		else
+			wait(1)
+		end
 	end
 end)
 
--- Animasi gradient muter
+-- Efek gradient muter
 task.spawn(function()
 	while true do
-		for i = 0, 360, 1 do
+		for i = 0,360,1 do
 			Gradient.Rotation = i
 			wait(0.03)
 		end
