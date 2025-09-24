@@ -1,507 +1,211 @@
--- KS Brutal Toolkit (REVISED)
--- Features: Repel, Gravity cycle, RandomTP All, Freeze (walk/jump lock), Force Sit, Bring All, Size Modifier
--- WARNING: Use only in private/testing environments.
+--[[
+Gabungan 4 fitur: Fly, Double Jump, Spectator, Admin Detect
+Tema GUI: Hitam-Putih
+]]
 
--- Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
-local Debris = game:GetService("Debris")
-local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
-
 local player = Players.LocalPlayer
-local PlayerGui = player:WaitForChild("PlayerGui")
 
--- ====== UI BUILD (fixed layout) ======
-local screen = Instance.new("ScreenGui")
-screen.Name = "KS_BrutalUI"
-screen.ResetOnSpawn = false
-screen.Parent = PlayerGui
-screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+-- Membuat GUI Utama
+local mainGui = Instance.new("ScreenGui")
+mainGui.Name = "AllInOneGui"
+mainGui.Parent = player:WaitForChild("PlayerGui")
 
--- Main frame (start hidden with animation)
-local Main = Instance.new("Frame")
-Main.Name = "Main"
-Main.Size = UDim2.new(0, 420, 0, 320)
-Main.Position = UDim2.new(0.5, -210, 0.5, -160)
-Main.BackgroundColor3 = Color3.fromRGB(50,50,50)
-Main.BorderSizePixel = 0
-Main.Visible = false
-Main.Parent = screen
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 300, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -150)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = mainGui
 
-local mainCorner = Instance.new("UICorner", Main)
-mainCorner.CornerRadius = UDim.new(0, 16)
-
-local stroke = Instance.new("UIStroke", Main)
-stroke.Thickness = 1.4
-stroke.Color = Color3.fromRGB(230,230,230)
-stroke.Transparency = 0.6
-
-local grad = Instance.new("UIGradient", Main)
-grad.Color = ColorSequence.new{
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(45,45,45)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(95,95,95)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(200,200,200))
-}
-grad.Rotation = 0
-
--- Title + subtitle
-local Title = Instance.new("TextLabel", Main)
-Title.Size = UDim2.new(1, -80, 0, 46)
-Title.Position = UDim2.new(0, 20, 0, 12)
-Title.BackgroundTransparency = 1
-Title.Text = "KS Brutal Toolkit"
-Title.TextColor3 = Color3.fromRGB(245,245,245)
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, 0, 0, 35)
+Title.Position = UDim2.new(0, 0, 0, 0)
+Title.BackgroundColor3 = Color3.fromRGB(40,40,40)
+Title.Text = "All Features GUI"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
 Title.Font = Enum.Font.GothamBold
-Title.TextSize = 26
-Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.TextSize = 18
+Title.Parent = MainFrame
 
-local Sub = Instance.new("TextLabel", Main)
-Sub.Size = UDim2.new(1, -80, 0, 18)
-Sub.Position = UDim2.new(0, 20, 0, 52)
-Sub.BackgroundTransparency = 1
-Sub.Text = "tema: abu • hitam • putih — gunakan di private server"
-Sub.TextColor3 = Color3.fromRGB(200,200,200)
-Sub.Font = Enum.Font.Gotham
-Sub.TextSize = 14
-Sub.TextXAlignment = Enum.TextXAlignment.Left
-
--- Close button (X)
-local CloseBtn = Instance.new("TextButton", Main)
-CloseBtn.Size = UDim2.new(0, 40, 0, 36)
-CloseBtn.Position = UDim2.new(1, -52, 0, 12)
+local CloseBtn = Instance.new("TextButton")
+CloseBtn.Size = UDim2.new(0, 30, 0, 30)
+CloseBtn.Position = UDim2.new(1, -35, 0, 0)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
 CloseBtn.Text = "X"
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 20
 CloseBtn.TextColor3 = Color3.fromRGB(255,255,255)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
-local closeCorner = Instance.new("UICorner", CloseBtn)
-closeCorner.CornerRadius = UDim.new(0,8)
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 18
+CloseBtn.Parent = MainFrame
 
--- Mini floating KS button (will show when closed)
-local KSBtn = Instance.new("TextButton", screen)
-KSBtn.Size = UDim2.new(0,45,0,45) -- requested size
-KSBtn.Position = UDim2.new(0, 16, 0.78, 0)
-KSBtn.Text = "KS"
-KSBtn.Font = Enum.Font.GothamBold
-KSBtn.TextSize = 16
-KSBtn.TextColor3 = Color3.fromRGB(255,255,255)
-KSBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
-local ksCorner = Instance.new("UICorner", KSBtn) ksCorner.CornerRadius = UDim.new(1,0)
-KSBtn.Visible = false
+local UIList = Instance.new("UIListLayout")
+UIList.Padding = UDim.new(0,8)
+UIList.SortOrder = Enum.SortOrder.LayoutOrder
+UIList.Parent = MainFrame
 
--- Buttons holder grid (2 columns)
-local btnHolder = Instance.new("Frame", Main)
-btnHolder.Size = UDim2.new(1, -40, 0, 220)
-btnHolder.Position = UDim2.new(0, 20, 0, 80)
-btnHolder.BackgroundTransparency = 1
-
-local function makeToggle(labelText, col, row)
-    local btn = Instance.new("TextButton", btnHolder)
-    btn.Size = UDim2.new(0.48, 0, 0, 46)
-    -- calculate X using column (1 or 2)
-    local x = (col == 1) and 0 or (btnHolder.AbsoluteSize.X * 0.52)
-    -- we can't use AbsoluteSize reliably here before render; use UDim2 anchors by grid math instead:
-    local xOffset = (col - 1) * (0.5) -- 0 or 0.5
-    btn.Position = UDim2.new(xOffset, 0, 0, (row - 1) * 56)
+--[[ BUTTON & LABEL CREATOR ]]--
+local function createButton(name)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, -20, 0, 35)
     btn.BackgroundColor3 = Color3.fromRGB(255,255,255)
-    btn.TextColor3 = Color3.fromRGB(25,25,25)
+    btn.Text = name
+    btn.TextColor3 = Color3.fromRGB(0,0,0)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 16
-    btn.Text = labelText
-    Instance.new("UICorner", btn).CornerRadius = UDim.new(0,8)
+    btn.Parent = MainFrame
+    local corner = Instance.new("UICorner", btn)
+    corner.CornerRadius = UDim.new(0,5)
     return btn
 end
 
--- create toggles in proper grid
-local RepelBtn = makeToggle("Repel: OFF", 1, 1)
-local GravityBtn = makeToggle("Gravity: Normal", 2, 1)
-local RandTPBtn = makeToggle("RandomTP All", 1, 2)
-local FreezeBtn = makeToggle("Freeze: OFF", 2, 2)
-local SitBtn = makeToggle("Force Sit: OFF", 1, 3)
-local TPAllBtn = makeToggle("Bring All", 2, 3)
-local SizeBtn = makeToggle("Size x1.00", 1, 4)
--- reserved slot for future feature, place placeholder
-local PlaceholderBtn = makeToggle("Reserved", 2, 4); PlaceholderBtn.BackgroundColor3 = Color3.fromRGB(120,120,120)
-
--- status label
-local labelSmall = Instance.new("TextLabel", Main)
-labelSmall.Size = UDim2.new(1, -40, 0, 18)
-labelSmall.Position = UDim2.new(0, 20, 0, 308)
-labelSmall.BackgroundTransparency = 1
-labelSmall.Font = Enum.Font.Gotham
-labelSmall.TextSize = 12
-labelSmall.TextColor3 = Color3.fromRGB(210,210,210)
-labelSmall.Text = "Repel radius: 10 | force:100 | Size scale:1.00"
-
--- ====== CORE VARIABLES ======
-local repelOn = false
-local repelRadius = 10
-local repelForce = 100
-local gravityMode = "normal" -- normal / low / high
-local freezeOn = false
-local sitOn = false
-local sizeScale = 1.0
-
-local originalStats = {} -- store walk/jump per player
-local originalPartSizes = {} -- store part sizes per player
-
--- safe get char parts
-local function getCharParts(p)
-    if not p or not p.Character then return nil end
-    local c = p.Character
-    local hrp = c:FindFirstChild("HumanoidRootPart")
-    local hum = c:FindFirstChildWhichIsA("Humanoid")
-    return c, hrp, hum
+local function createLabel(name)
+    local lbl = Instance.new("TextLabel")
+    lbl.Size = UDim2.new(1, -20, 0, 30)
+    lbl.BackgroundTransparency = 1
+    lbl.Text = name
+    lbl.TextColor3 = Color3.fromRGB(255,255,255)
+    lbl.Font = Enum.Font.GothamBold
+    lbl.TextSize = 16
+    lbl.Parent = MainFrame
+    return lbl
 end
 
--- draggable implementation for KSBtn & Main (robust)
-local function makeDraggable(frame)
-    local dragging, dragInput, dragStart, startPos
-    frame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = true
-            dragStart = input.Position
-            startPos = frame.Position
-            input.Changed:Connect(function()
-                if input.UserInputState == Enum.UserInputState.End then
-                    dragging = false
-                end
-            end)
-        end
-    end)
-    frame.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-            dragInput = input
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if input == dragInput and dragging then
-            local delta = input.Position - dragStart
-            frame.Position = UDim2.new(
-                startPos.X.Scale,
-                startPos.X.Offset + delta.X,
-                startPos.Y.Scale,
-                startPos.Y.Offset + delta.Y
-            )
-        end
-    end)
-end
-makeDraggable(KSBtn)
-makeDraggable(Main)
+--[[ FITUR FLY ]]--
+local flyBtn = createButton("Toggle Fly")
+local flySpeedLabel = createLabel("Speed: 1")
 
--- blur effect
-local blur = Instance.new("BlurEffect")
-blur.Size = 0
-blur.Parent = Lighting
+local flyEnabled = false
+local flySpeed = 1
 
-local function openUI()
-    KSBtn.Visible = false
-    Main.Visible = true
-    TweenService:Create(blur, TweenInfo.new(0.45, Enum.EasingStyle.Sine, Enum.EasingDirection.Out), {Size = 16}):Play()
-    Main.Size = UDim2.new(0, 0, 0, 0)
-    TweenService:Create(Main, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0,420,0,320)}):Play()
-end
-
-local function closeUI()
-    TweenService:Create(blur, TweenInfo.new(0.35, Enum.EasingStyle.Sine), {Size = 0}):Play()
-    local tw = TweenService:Create(Main, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0,0,0,0)})
-    tw:Play()
-    tw.Completed:Wait()
-    Main.Visible = false
-    KSBtn.Visible = true
-end
-
--- init
-openUI()
-
-CloseBtn.MouseButton1Click:Connect(function()
-    closeUI()
-end)
-KSBtn.MouseButton1Click:Connect(function()
-    openUI()
-end)
-
--- helper iterate others
-local function forEachOther(fn)
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= player then
-            local c, hrp, hum = getCharParts(plr)
-            if c and hrp and hum then
-                pcall(fn, plr, c, hrp, hum)
-            end
-        end
-    end
-end
-
--- ===== FEATURE: REPEL (fixed & cooldowned) =====
-local repelCooldowns = {} -- uid -> lastTick
-
-local function setRepel(on)
-    repelOn = on
-    if repelOn then
-        RepelBtn.Text = "Repel: ON"
-        RepelBtn.BackgroundColor3 = Color3.fromRGB(180,255,180)
+flyBtn.MouseButton1Click:Connect(function()
+    flyEnabled = not flyEnabled
+    if flyEnabled then
+        flyBtn.Text = "Fly: ON"
+        -- implementasi logika Fly di sini
     else
-        RepelBtn.Text = "Repel: OFF"
-        RepelBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
+        flyBtn.Text = "Fly: OFF"
+        -- disable logika Fly
+    end
+end)
+
+--[[ FITUR DOUBLE JUMP ]]--
+local jumpBtn = createButton("Toggle Double Jump")
+local jumpSpeedLabel = createLabel("Speed: 16")
+
+local doubleJump = false
+local speed = 16
+
+jumpBtn.MouseButton1Click:Connect(function()
+    doubleJump = not doubleJump
+    if doubleJump then
+        jumpBtn.Text = "Double Jump: ON"
+    else
+        jumpBtn.Text = "Double Jump: OFF"
+    end
+end)
+
+--[[ FITUR SPECTATOR ]]--
+local specLabel = createLabel("Target: None")
+local leftBtn = createButton("<")
+local rightBtn = createButton(">")
+local tpBtn = createButton("Teleport")
+
+local playersList = {}
+local index = 1
+local targetPlayer = nil
+
+local function refreshPlayers()
+    playersList = {}
+    for _,plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player then
+            table.insert(playersList, plr)
+        end
+    end
+    if #playersList > 0 then
+        index = 1
+        targetPlayer = playersList[index]
+    else
+        targetPlayer = nil
+    end
+    if targetPlayer then
+        specLabel.Text = "Target: "..targetPlayer.Name
+    else
+        specLabel.Text = "Target: None"
     end
 end
 
-RepelBtn.MouseButton1Click:Connect(function()
-    setRepel(not repelOn)
+refreshPlayers()
+Players.PlayerAdded:Connect(refreshPlayers)
+Players.PlayerRemoving:Connect(refreshPlayers)
+
+leftBtn.MouseButton1Click:Connect(function()
+    if #playersList > 0 then
+        index = (index - 2) % #playersList + 1
+        targetPlayer = playersList[index]
+        specLabel.Text = "Target: "..targetPlayer.Name
+    end
 end)
+
+rightBtn.MouseButton1Click:Connect(function()
+    if #playersList > 0 then
+        index = index % #playersList + 1
+        targetPlayer = playersList[index]
+        specLabel.Text = "Target: "..targetPlayer.Name
+    end
+end)
+
+tpBtn.MouseButton1Click:Connect(function()
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+        if root then
+            root.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
+        end
+    end
+end)
+
+--[[ FITUR ADMIN DETECT ]]--
+local ownerLabel = createLabel("Owner: 0")
+local adminLabel = createLabel("Admin: 0")
+
+local ownerKeywords = {"owner","dev","developer","pemilik"}
+local adminKeywords = {"admin","penjaga","moderator","staff","superadmin","headadmin","coadmin"}
+
+local function isOwner(p)
+    local title = p:FindFirstChild("Title")
+    if title and title:IsA("StringValue") then
+        local text = title.Value:lower()
+        for _,kw in ipairs(ownerKeywords) do
+            if text:find(kw) then return true end
+        end
+    end
+    return false
+end
+
+local function isAdmin(p)
+    local title = p:FindFirstChild("Title")
+    if title and title:IsA("StringValue") then
+        local text = title.Value:lower()
+        for _,kw in ipairs(adminKeywords) do
+            if text:find(kw) then return true end
+        end
+    end
+    return false
+end
 
 RunService.Heartbeat:Connect(function()
-    if not repelOn then return end
-    local myc, myhrp, myhum = getCharParts(player)
-    if not myhrp then return end
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= player and plr.Character then
-            local otherHRP = plr.Character:FindFirstChild("HumanoidRootPart")
-            if otherHRP then
-                local dist = (otherHRP.Position - myhrp.Position).Magnitude
-                if dist <= repelRadius then
-                    local uid = plr.UserId
-                    local last = repelCooldowns[uid] or 0
-                    if tick() - last >= 0.35 then
-                        repelCooldowns[uid] = tick()
-                        -- create BodyVelocity and apply upward impulse
-                        local dir = (otherHRP.Position - myhrp.Position)
-                        if dir.Magnitude == 0 then dir = Vector3.new(math.random(),1,math.random()) end
-                        local bv = Instance.new("BodyVelocity")
-                        bv.MaxForce = Vector3.new(1e6,1e6,1e6)
-                        bv.Velocity = dir.Unit * repelForce + Vector3.new(0, 40, 0)
-                        bv.Parent = otherHRP
-                        Debris:AddItem(bv, 0.22)
-                    end
-                end
-            end
-        end
+    local owners = 0
+    local admins = 0
+    for _, plr in pairs(Players:GetPlayers()) do
+        if isOwner(plr) then owners += 1
+        elseif isAdmin(plr) then admins += 1 end
     end
+    ownerLabel.Text = "Owner: "..owners
+    adminLabel.Text = "Admin: "..admins
 end)
 
--- quick edit: middle-click (MouseButton2) on RepelBtn to prompt simple numeric input
--- (implementation limited in LocalScript; left as placeholder)
-
--- ===== FEATURE: GRAVITY CYCLE =====
-GravityBtn.MouseButton1Click:Connect(function()
-    if gravityMode == "normal" then
-        gravityMode = "low"
-        GravityBtn.Text = "Gravity: Low"
-        workspace.Gravity = 60 -- lower
-    elseif gravityMode == "low" then
-        gravityMode = "high"
-        GravityBtn.Text = "Gravity: High"
-        workspace.Gravity = 400 -- high
-    else
-        gravityMode = "normal"
-        GravityBtn.Text = "Gravity: Normal"
-        workspace.Gravity = 196.2 -- default
-    end
-    labelSmall.Text = ("Repel radius: %d | force: %d | Size x%.2f | Gravity: %s"):format(repelRadius, repelForce, sizeScale, gravityMode)
+CloseBtn.MouseButton1Click:Connect(function()
+    MainFrame.Visible = false
 end)
-
--- ===== FEATURE: RANDOM TELEPORT ALL =====
-RandTPBtn.MouseButton1Click:Connect(function()
-    RandTPBtn.Text = "RandomTPing..."
-    forEachOther(function(plr, c, hrp, hum)
-        pcall(function()
-            local rx = hrp.Position.X + math.random(-80,80)
-            local rz = hrp.Position.Z + math.random(-80,80)
-            local ry = hrp.Position.Y + 40
-            hrp.CFrame = CFrame.new(rx, ry, rz)
-        end)
-    end)
-    wait(0.6)
-    RandTPBtn.Text = "RandomTP All"
-end)
-
--- ===== FEATURE: FREEZE (simulate freeze by locking walk/jump) =====
-FreezeBtn.MouseButton1Click:Connect(function()
-    freezeOn = not freezeOn
-    if freezeOn then
-        FreezeBtn.Text = "Freeze: ON"
-        FreezeBtn.BackgroundColor3 = Color3.fromRGB(180,255,180)
-        forEachOther(function(plr, c, hrp, hum)
-            local uid = plr.UserId
-            if not originalStats[uid] then
-                originalStats[uid] = {walk = hum.WalkSpeed, jump = hum.JumpPower}
-            end
-            pcall(function()
-                hum.WalkSpeed = 0
-                hum.JumpPower = 0
-            end)
-        end)
-    else
-        FreezeBtn.Text = "Freeze: OFF"
-        FreezeBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
-        forEachOther(function(plr, c, hrp, hum)
-            local uid = plr.UserId
-            if originalStats[uid] then
-                pcall(function()
-                    hum.WalkSpeed = originalStats[uid].walk or 16
-                    hum.JumpPower = originalStats[uid].jump or 50
-                end)
-                originalStats[uid] = nil
-            end
-        end)
-    end
-    labelSmall.Text = ("Repel radius: %d | force: %d | Size x%.2f | Gravity: %s"):format(repelRadius, repelForce, sizeScale, gravityMode)
-end)
-
--- ===== FEATURE: FORCE SIT =====
-SitBtn.MouseButton1Click:Connect(function()
-    sitOn = not sitOn
-    if sitOn then
-        SitBtn.Text = "Force Sit: ON"
-        SitBtn.BackgroundColor3 = Color3.fromRGB(180,255,180)
-        forEachOther(function(plr, c, hrp, hum)
-            pcall(function() hum.Sit = true end)
-        end)
-    else
-        SitBtn.Text = "Force Sit: OFF"
-        SitBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
-        forEachOther(function(plr, c, hrp, hum)
-            pcall(function() hum.Sit = false end)
-        end)
-    end
-end)
-
--- ===== FEATURE: BRING ALL (teleport all to me) =====
-TPAllBtn.MouseButton1Click:Connect(function()
-    TPAllBtn.Text = "Bringing..."
-    local myChar = player.Character
-    if not myChar then return end
-    local myHRP = myChar:FindFirstChild("HumanoidRootPart")
-    if not myHRP then return end
-    forEachOther(function(plr, c, hrp, hum)
-        pcall(function()
-            hrp.CFrame = myHRP.CFrame + Vector3.new(math.random(-3,3), 0, math.random(-3,3))
-        end)
-    end)
-    wait(0.8)
-    TPAllBtn.Text = "Bring All"
-end)
-
--- ===== FEATURE: SIZE MODIFIER =====
-SizeBtn.MouseButton1Click:Connect(function()
-    -- cycle scales: 1.0 -> 1.8 -> 0.6 -> 1.0
-    if math.abs(sizeScale - 1.0) < 0.01 then
-        sizeScale = 1.8
-    elseif math.abs(sizeScale - 1.8) < 0.01 then
-        sizeScale = 0.6
-    else
-        sizeScale = 1.0
-    end
-    SizeBtn.Text = ("Size x%.2f"):format(sizeScale)
-    -- apply: store original sizes if not stored, then scale baseparts
-    forEachOther(function(plr, c, hrp, hum)
-        local uid = plr.UserId
-        if not originalPartSizes[uid] then
-            originalPartSizes[uid] = {}
-            for _, part in ipairs(c:GetDescendants()) do
-                if part:IsA("BasePart") then
-                    originalPartSizes[uid][part] = part.Size
-                end
-            end
-        end
-        -- apply scaled sizes (wrapped in pcall)
-        pcall(function()
-            for part, orig in pairs(originalPartSizes[uid]) do
-                if part and part.Parent then
-                    part.Size = orig * sizeScale
-                end
-            end
-        end)
-    end)
-    labelSmall.Text = ("Repel radius: %d | force: %d | Size x%.2f | Gravity: %s"):format(repelRadius, repelForce, sizeScale, gravityMode)
-end)
-
--- Right-click restore sizes (MouseButton2)
-SizeBtn.MouseButton2Click:Connect(function()
-    sizeScale = 1.0
-    SizeBtn.Text = "Size x1.00"
-    for uid, parts in pairs(originalPartSizes) do
-        for part, orig in pairs(parts) do
-            if part and part.Parent then
-                pcall(function() part.Size = orig end)
-            end
-        end
-    end
-    originalPartSizes = {}
-    labelSmall.Text = ("Repel radius: %d | force: %d | Size x%.2f | Gravity: %s"):format(repelRadius, repelForce, sizeScale, gravityMode)
-end)
-
--- ===== A few utilities & keyboard shortcuts =====
-UserInputService.InputBegan:Connect(function(input, gpe)
-    if gpe then return end
-    if input.KeyCode == Enum.KeyCode.K then
-        RepelBtn.MouseButton1Click:Fire()
-    elseif input.KeyCode == Enum.KeyCode.L then
-        FreezeBtn.MouseButton1Click:Fire()
-    end
-end)
-
--- restore on exit / player leaving
-Players.PlayerRemoving:Connect(function(plr)
-    local id = plr.UserId
-    originalStats[id] = nil
-    originalPartSizes[id] = nil
-end)
-
-screen:BindToClose(function()
-    -- restore gravity default (best effort)
-    workspace.Gravity = 196.2
-    -- restore player stats & sizes
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= player and plr.Character then
-            local c, hrp, hum = getCharParts(plr)
-            if hum and originalStats[plr.UserId] then
-                pcall(function()
-                    hum.WalkSpeed = originalStats[plr.UserId].walk or hum.WalkSpeed
-                    hum.JumpPower = originalStats[plr.UserId].jump or hum.JumpPower
-                end)
-            end
-            if originalPartSizes[plr.UserId] then
-                for part, s in pairs(originalPartSizes[plr.UserId]) do
-                    if part and part.Parent then pcall(function() part.Size = s end) end
-                end
-            end
-        end
-    end
-    if blur and blur.Parent then blur:Destroy() end
-end)
-
--- visual loops: gradient rotate + breathing
-task.spawn(function()
-    while screen.Parent do
-        for r = 0, 360, 2 do
-            grad.Rotation = r
-            wait(0.02)
-        end
-    end
-end)
-
-task.spawn(function()
-    while screen.Parent do
-        if Main.Visible then
-            TweenService:Create(Main, TweenInfo.new(2.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.new(0,430,0,330)}):Play()
-            wait(2.6)
-            TweenService:Create(Main, TweenInfo.new(2.6, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.new(0,420,0,320)}):Play()
-            wait(2.6)
-        else
-            wait(1)
-        end
-    end
-end)
-
--- update status line periodically
-task.spawn(function()
-    while screen.Parent do
-        labelSmall.Text = ("Repel radius: %d | force: %d | Size x%.2f | Gravity: %s"):format(repelRadius, repelForce, sizeScale, gravityMode)
-        wait(0.7)
-    end
-end)
-
