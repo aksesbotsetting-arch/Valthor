@@ -2,6 +2,7 @@ local ScreenGui = Instance.new("ScreenGui")
 local MainFrame = Instance.new("Frame")
 local TitleLabel = Instance.new("TextLabel")
 local CloseButton = Instance.new("TextButton")
+local Icon = Instance.new("ImageLabel")
 local Button1 = Instance.new("TextButton")
 local Button2 = Instance.new("TextButton")
 local Button3 = Instance.new("TextButton")
@@ -14,8 +15,10 @@ ScreenGui.Name = "AllMenuGui"
 -- Setting up MainFrame
 MainFrame.Parent = ScreenGui
 MainFrame.BackgroundColor3 = Color3.fromRGB(34, 34, 34)  -- Dark gray background
-MainFrame.Position = UDim2.new(0.5, -200, 0.5, -150)
-MainFrame.Size = UDim2.new(0, 400, 0, 300)
+MainFrame.Position = UDim2.new(0.5, -250, 0.5, -200)  -- Center the frame
+MainFrame.Size = UDim2.new(0, 500, 0, 400)
+MainFrame.BorderSizePixel = 2
+MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)  -- Black border
 
 -- Setting up TitleLabel
 TitleLabel.Parent = MainFrame
@@ -24,7 +27,8 @@ TitleLabel.Size = UDim2.new(1, 0, 0, 50)
 TitleLabel.Text = "All Menu | @ NazamOfficial"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text
 TitleLabel.TextSize = 24
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Center
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
+TitleLabel.Position = UDim2.new(0, 55, 0, 0)
 
 -- Setting up CloseButton
 CloseButton.Parent = MainFrame
@@ -34,6 +38,12 @@ CloseButton.Size = UDim2.new(0, 30, 0, 30)
 CloseButton.Text = "X"
 CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text
 CloseButton.TextSize = 18
+
+-- Setting up Icon
+Icon.Parent = MainFrame
+Icon.Size = UDim2.new(0, 40, 0, 40)
+Icon.Position = UDim2.new(0, 10, 0, 5)
+Icon.Image = "rbxassetid://12345678"  -- Ganti dengan ID asset gambar sesuai keinginan
 
 -- Setting up Buttons
 Button1.Parent = MainFrame
