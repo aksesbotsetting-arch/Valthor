@@ -1,0 +1,166 @@
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local chr, hum
+
+-- Creating the main GUI container
+local gui = Instance.new("ScreenGui")
+gui.Name = "MainGui"
+gui.Parent = game:GetService("CoreGui")
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 250, 0, 180)
+mainFrame.Position = UDim2.new(0.5, -125, 0.5, -90)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)  -- Dark theme background
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.Parent = gui
+
+-- Rounded corners for the main frame
+local mainCorner = Instance.new("UICorner", mainFrame)
+mainCorner.CornerRadius = UDim.new(0, 12)
+
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -35, 0, 35)
+title.Position = UDim2.new(0, 0, 0, 0)
+title.BackgroundColor3 = Color3.fromRGB(30, 30, 30)  -- Darker background for title bar
+title.Text = "Fly | @NazamOfficial"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text
+title.Font = Enum.Font.GothamBold
+title.TextSize = 16
+title.BorderSizePixel = 0
+title.Parent = mainFrame
+
+-- Rounded corners for the title
+local titleCorner = Instance.new("UICorner", title)
+titleCorner.CornerRadius = UDim.new(0, 12)
+
+-- Close Button (X)
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
+closeBtn.Position = UDim2.new(1, -30, 0, 0)
+closeBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)  -- Red close button
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+closeBtn.Font = Enum.Font.GothamBold
+closeBtn.TextSize = 16
+closeBtn.BorderSizePixel = 0
+closeBtn.Parent = mainFrame
+
+-- BG Button that appears when X is clicked
+local bgBtn = Instance.new("TextButton")
+bgBtn.Size = UDim2.new(0, 45, 0, 45)
+bgBtn.Position = UDim2.new(0.5, -22, 0, 80)  -- Position in the center, slightly up
+bgBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)  -- Black color for BG button
+bgBtn.Text = "BG"
+bgBtn.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text on BG button
+bgBtn.Font = Enum.Font.GothamBold
+bgBtn.TextSize = 14
+bgBtn.Visible = false
+bgBtn.Parent = gui
+
+-- Rounded corners for the BG button
+local bgCorner = Instance.new("UICorner", bgBtn)
+bgCorner.CornerRadius = UDim.new(1, 0)
+
+-- Function to allow BG button to be dragged
+local dragging, dragInput, dragStart, startPos
+bgBtn.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 then
+        dragging = true
+        dragStart = input.Position
+        startPos = bgBtn.Position
+
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
+end)
+
+UserInputService.InputChanged:Connect(function(input)
+    if input == dragInput and dragging then
+        local delta = input.Position - dragStart
+        bgBtn.Position = UDim2.new(
+            startPos.X.Scale,
+            startPos.X.Offset + delta.X,
+            startPos.Y.Scale,
+            startPos.Y.Offset + delta.Y
+        )
+    end
+end)
+
+-- Fly Button and related elements
+local flyBtn = Instance.new("TextButton")
+flyBtn.Size = UDim2.new(1, 0, 0, 30)
+flyBtn.Position = UDim2.new(0, 0, 0, 50)
+flyBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 255)  -- Blue for Fly button
+flyBtn.Text = "Fly"
+flyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+flyBtn.Font = Enum.Font.GothamBold
+flyBtn.TextSize = 18
+flyBtn.Parent = mainFrame
+
+-- Rounded corners for the Fly Button
+local flyBtnCorner = Instance.new("UICorner", flyBtn)
+flyBtnCorner.CornerRadius = UDim.new(0, 12)
+
+local statusLabel = Instance.new("TextLabel")
+statusLabel.Size = UDim2.new(1, 0, 0, 30)
+statusLabel.Position = UDim2.new(0, 0, 0, 120)
+statusLabel.BackgroundColor3 = Color3.fromRGB(40, 40, 40)  -- Slightly lighter gray for status
+statusLabel.Text = "Status: OFF"
+statusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+statusLabel.Font = Enum.Font.GothamBold
+statusLabel.TextSize = 16
+statusLabel.Parent = mainFrame
+
+-- Fly functionality
+local flying = false
+flyBtn.MouseButton1Click:Connect(function()
+    flying = not flying
+    if flying then
+        statusLabel.Text = "Status: ON"
+        -- Add flying logic
+    else
+        statusLabel.Text = "Status: OFF"
+        -- Add logic to stop flying
+    end
+end)
+
+-- Infinite Jump Button (Similar structure as Fly)
+local infiniteJumpBtn = Instance.new("TextButton")
+infiniteJumpBtn.Size = UDim2.new(1, 0, 0, 30)
+infiniteJumpBtn.Position = UDim2.new(0, 0, 0, 150)
+infiniteJumpBtn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)  -- Red for Infinite Jump
+infiniteJumpBtn.Text = "Infinite Jump"
+infiniteJumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+infiniteJumpBtn.Font = Enum.Font.GothamBold
+infiniteJumpBtn.TextSize = 18
+infiniteJumpBtn.Parent = mainFrame
+
+-- Rounded corners for Infinite Jump Button
+local infiniteJumpBtnCorner = Instance.new("UICorner", infiniteJumpBtn)
+infiniteJumpBtnCorner.CornerRadius = UDim.new(0, 12)
+
+-- Spectator (Spec + Tp) and Admin Check (Similar structure to above)
+
+-- Close and BG Button Logic
+closeBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = false
+    bgBtn.Visible = true
+end)
+
+bgBtn.MouseButton1Click:Connect(function()
+    mainFrame.Visible = true
+    bgBtn.Visible = false
+end)
+
+-- Placeholder for Infinite Jump & Spectator scripts
+-- Infinite Jump code and other features would be integrated similarly
