@@ -1,136 +1,177 @@
 local ScreenGui = Instance.new("ScreenGui")
-local MainFrame = Instance.new("Frame")
-local TitleLabel = Instance.new("TextLabel")
-local CloseButton = Instance.new("TextButton")
-local Icon = Instance.new("ImageLabel")
-local Button1 = Instance.new("TextButton")
-local Button2 = Instance.new("TextButton")
-local Button3 = Instance.new("TextButton")
-local Button4 = Instance.new("TextButton")
-local StatusLabel = Instance.new("TextLabel")
-local SpeedLabel = Instance.new("TextLabel")
-local SpeedPlusButton = Instance.new("TextButton")
-local SpeedMinusButton = Instance.new("TextButton")
-local TeleportButton = Instance.new("TextButton")
-local AdminLabel = Instance.new("TextLabel")
-local StartButton = Instance.new("TextButton")
-
--- Setting up ScreenGui
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.Name = "AllMenuGui"
 
--- Setting up MainFrame
+-- Frame utama
+local MainFrame = Instance.new("Frame")
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)  -- Dark gray background
-MainFrame.Position = UDim2.new(0.5, -250, 0.5, -200)  -- Center the frame
-MainFrame.Size = UDim2.new(0, 550, 0, 450)
-MainFrame.BorderSizePixel = 2
-MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)  -- Black border
+MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
+MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
+MainFrame.Size = UDim2.new(0, 600, 0, 400)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
 
--- Setting up TitleLabel
+-- Judul Frame
+local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Parent = MainFrame
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Size = UDim2.new(1, 0, 0, 50)
-TitleLabel.Text = "All Menu | @ NazamOfficial"
-TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text
+TitleLabel.Size = UDim2.new(1, 0, 0, 40)
+TitleLabel.Text = "All Features | @NazamOfficial"
+TitleLabel.TextColor3 = Color3.fromRGB(0, 0, 0)  -- Hitam
 TitleLabel.TextSize = 24
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
-TitleLabel.Position = UDim2.new(0, 55, 0, 0)
+TitleLabel.Font = Enum.Font.SourceSansBold
+TitleLabel.TextXAlignment = Enum.TextXAlignment.Center
+TitleLabel.Position = UDim2.new(0, 0, 0, 0)
 
--- Setting up CloseButton
+-- Tombol Close
+local CloseButton = Instance.new("TextButton")
 CloseButton.Parent = MainFrame
-CloseButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Red
-CloseButton.Position = UDim2.new(1, -40, 0, 10)
+CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)  -- Merah
+CloseButton.Position = UDim2.new(1, -40, 0, 5)
 CloseButton.Size = UDim2.new(0, 30, 0, 30)
 CloseButton.Text = "X"
-CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- White text
+CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
 CloseButton.TextSize = 18
+CloseButton.TextFont = Enum.Font.SourceSansBold
+CloseButton.BorderSizePixel = 0
 
--- Setting up Icon
-Icon.Parent = MainFrame
-Icon.Size = UDim2.new(0, 40, 0, 40)
-Icon.Position = UDim2.new(0, 10, 0, 5)
-Icon.Image = "rbxassetid://12345678"  -- Ganti dengan ID asset gambar sesuai keinginan
+-- Tombol Fly
+local FlyButton = Instance.new("TextButton")
+FlyButton.Parent = MainFrame
+FlyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)  -- Biru
+FlyButton.Position = UDim2.new(0, 50, 0, 60)
+FlyButton.Size = UDim2.new(0, 200, 0, 40)
+FlyButton.Text = "Fly"
+FlyButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
+FlyButton.TextSize = 18
+FlyButton.TextFont = Enum.Font.SourceSansBold
 
--- Setting up Buttons (Fly, Spec + Tp, Cek Own/Admin, Infinite Jump)
-Button1.Parent = MainFrame
-Button1.BackgroundColor3 = Color3.fromRGB(51, 51, 51)  -- Dark gray button
-Button1.Position = UDim2.new(0, 10, 0, 60)
-Button1.Size = UDim2.new(0, 250, 0, 50)
-Button1.Text = "Fly"
+-- Tombol Infinite Jump
+local InfiniteJumpButton = Instance.new("TextButton")
+InfiniteJumpButton.Parent = MainFrame
+InfiniteJumpButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- Hijau
+InfiniteJumpButton.Position = UDim2.new(0, 50, 0, 120)
+InfiniteJumpButton.Size = UDim2.new(0, 200, 0, 40)
+InfiniteJumpButton.Text = "Infinite Jump"
+InfiniteJumpButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
+InfiniteJumpButton.TextSize = 18
+InfiniteJumpButton.TextFont = Enum.Font.SourceSansBold
 
-Button2.Parent = MainFrame
-Button2.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
-Button2.Position = UDim2.new(0, 10, 0, 120)
-Button2.Size = UDim2.new(0, 250, 0, 50)
-Button2.Text = "Spec + Tp"
+-- Tombol Spectator
+local SpectatorButton = Instance.new("TextButton")
+SpectatorButton.Parent = MainFrame
+SpectatorButton.BackgroundColor3 = Color3.fromRGB(255, 255, 0)  -- Kuning
+SpectatorButton.Position = UDim2.new(0, 50, 0, 180)
+SpectatorButton.Size = UDim2.new(0, 200, 0, 40)
+SpectatorButton.Text = "Spectator Mode"
+SpectatorButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
+SpectatorButton.TextSize = 18
+SpectatorButton.TextFont = Enum.Font.SourceSansBold
 
-Button3.Parent = MainFrame
-Button3.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
-Button3.Position = UDim2.new(0, 10, 0, 180)
-Button3.Size = UDim2.new(0, 250, 0, 50)
-Button3.Text = "Cek Own/Admin"
+-- Tombol Admin Detection
+local AdminDetectButton = Instance.new("TextButton")
+AdminDetectButton.Parent = MainFrame
+AdminDetectButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Merah
+AdminDetectButton.Position = UDim2.new(0, 50, 0, 240)
+AdminDetectButton.Size = UDim2.new(0, 200, 0, 40)
+AdminDetectButton.Text = "Admin Detection"
+AdminDetectButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
+AdminDetectButton.TextSize = 18
+AdminDetectButton.TextFont = Enum.Font.SourceSansBold
 
-Button4.Parent = MainFrame
-Button4.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
-Button4.Position = UDim2.new(0, 10, 0, 240)
-Button4.Size = UDim2.new(0, 250, 0, 50)
-Button4.Text = "Infinite Jump"
+-- Animasi untuk tombol saat di klik
+local function buttonClickAnimation(button)
+    local originalSize = button.Size
+    local originalPos = button.Position
+    button:TweenSize(UDim2.new(0, 210, 0, 45), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
+    button:TweenPosition(UDim2.new(0, 50, 0, button.Position.Y.Offset - 5), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
+    wait(0.1)
+    button:TweenSize(originalSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
+    button:TweenPosition(originalPos, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
+end
 
--- Setting up Status Label (for Infinite Jump)
-StatusLabel.Parent = MainFrame
-StatusLabel.BackgroundTransparency = 1
-StatusLabel.Position = UDim2.new(0, 270, 0, 60)
-StatusLabel.Size = UDim2.new(0, 250, 0, 50)
-StatusLabel.Text = "Infinite Jump: Off"
-StatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-StatusLabel.TextSize = 18
+FlyButton.MouseButton1Click:Connect(function()
+    buttonClickAnimation(FlyButton)
+    -- Fly Feature Code
+    local player = game.Players.LocalPlayer
+    local character = player.Character
+    local humanoid = character:WaitForChild("Humanoid")
+    local torso = character:WaitForChild("Torso")
+    
+    local bodyGyro = Instance.new("BodyGyro", torso)
+    local bodyVelocity = Instance.new("BodyVelocity", torso)
+    
+    bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
+    bodyGyro.CFrame = torso.CFrame
+    bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
+    
+    bodyVelocity.Velocity = Vector3.new(0, 50, 0)  -- Fly up velocity
 
--- Speed Settings
-SpeedLabel.Parent = MainFrame
-SpeedLabel.BackgroundTransparency = 1
-SpeedLabel.Position = UDim2.new(0, 270, 0, 120)
-SpeedLabel.Size = UDim2.new(0, 250, 0, 50)
-SpeedLabel.Text = "Speed: 16"
-SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-SpeedLabel.TextSize = 18
+    -- To stop flying
+    -- bodyGyro:Destroy()
+    -- bodyVelocity:Destroy()
+end)
 
-SpeedPlusButton.Parent = MainFrame
-SpeedPlusButton.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
-SpeedPlusButton.Position = UDim2.new(0, 270, 0, 180)
-SpeedPlusButton.Size = UDim2.new(0, 50, 0, 50)
-SpeedPlusButton.Text = "+"
+InfiniteJumpButton.MouseButton1Click:Connect(function()
+    buttonClickAnimation(InfiniteJumpButton)
+    -- Infinite Jump Code
+    local player = game.Players.LocalPlayer
+    local humanoid = player.Character:WaitForChild("Humanoid")
+    local jumpCount = 0
 
-SpeedMinusButton.Parent = MainFrame
-SpeedMinusButton.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
-SpeedMinusButton.Position = UDim2.new(0, 330, 0, 180)
-SpeedMinusButton.Size = UDim2.new(0, 50, 0, 50)
-SpeedMinusButton.Text = "-"
+    humanoid.StateChanged:Connect(function(_, newState)
+        if newState == Enum.HumanoidStateType.Freefall then
+            if jumpCount < 1 then
+                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                jumpCount = jumpCount + 1
+            end
+        elseif newState == Enum.HumanoidStateType.Landed then
+            jumpCount = 0
+        end
+    end)
+end)
 
--- Setting up Teleport Button
-TeleportButton.Parent = MainFrame
-TeleportButton.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
-TeleportButton.Position = UDim2.new(0, 270, 0, 240)
-TeleportButton.Size = UDim2.new(0, 250, 0, 50)
-TeleportButton.Text = "Teleport"
+SpectatorButton.MouseButton1Click:Connect(function()
+    buttonClickAnimation(SpectatorButton)
+    -- Spectator Mode Code
+    local player = game.Players.LocalPlayer
+    local camera = workspace.CurrentCamera
+    
+    camera.CameraSubject = nil
+    camera.CameraType = Enum.CameraType.Scriptable
+    camera.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position + Vector3.new(0, 10, 0))
+end)
 
--- Setting up Admin Info
-AdminLabel.Parent = MainFrame
-AdminLabel.BackgroundTransparency = 1
-AdminLabel.Position = UDim2.new(0, 270, 0, 300)
-AdminLabel.Size = UDim2.new(0, 250, 0, 50)
-AdminLabel.Text = "Admin: 0 | Owner: 0"
-AdminLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-AdminLabel.TextSize = 18
+AdminDetectButton.MouseButton1Click:Connect(function()
+    buttonClickAnimation(AdminDetectButton)
+    -- Admin Detection Code
+    local Players = game:GetService("Players")
+    local player = Players.LocalPlayer
+    local adminKeywords = {"admin", "owner", "dev", "developer"}
 
--- Setting up Start Button
-StartButton.Parent = MainFrame
-StartButton.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
-StartButton.Position = UDim2.new(0, 270, 0, 360)
-StartButton.Size = UDim2.new(0, 250, 0, 50)
-StartButton.Text = "Start"
+    local function isAdmin(player)
+        local title = player:FindFirstChild("Title")
+        if title then
+            for _, keyword in ipairs(adminKeywords) do
+                if title.Value:lower():find(keyword) then
+                    return true
+                end
+            end
+        end
+        return false
+    end
 
--- Close the GUI when X is clicked
+    -- Show Admin Info
+    for _, plr in pairs(Players:GetPlayers()) do
+        if isAdmin(plr) then
+            print(plr.Name .. " is an admin!")
+        end
+    end
+end)
+
+-- Menutup GUI
 CloseButton.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
 end)
+
