@@ -1,172 +1,184 @@
--- Combined GUI Script with Fly, Double Jump, Spectator, Admin Detect
--- Theme: Black, Gray, White, Layout 16:9
-
+--// Services
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
+local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
-local player = Players.LocalPlayer
+--// GUI
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "SpectatorGui"
+ScreenGui.Parent = game:GetService("CoreGui")
+ScreenGui.ResetOnSpawn = false
 
--- GUI Container
-local mainGui = Instance.new("ScreenGui")
-mainGui.Name = "MainGui"
-mainGui.Parent = player:WaitForChild("PlayerGui")
-mainGui.ResetOnSpawn = false
+local MainFrame = Instance.new("Frame")
+MainFrame.Size = UDim2.new(0, 300, 0, 180)
+MainFrame.Position = UDim2.new(0.5, -150, 0.5, -90)
+MainFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
+MainFrame.BorderSizePixel = 0
+MainFrame.Active = true
+MainFrame.Draggable = true
+MainFrame.Parent = ScreenGui
 
--- Main Frame
-local Main = Instance.new("Frame")
-Main.Size = UDim2.new(0, 800, 0, 450) -- 16:9 Layout
-Main.Position = UDim2.new(0.1, 0, 0.2, 0)
-Main.BackgroundColor3 = Color3.fromRGB(30,30,30)
-Main.BorderSizePixel = 0
-Main.Active = true
-Main.Draggable = true
-Main.Parent = mainGui
-local mainCorner = Instance.new("UICorner")
-mainCorner.CornerRadius = UDim.new(0, 12)
-mainCorner.Parent = Main
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 10)
+UICorner.Parent = MainFrame
 
--- Close Button
+local Title = Instance.new("TextLabel")
+Title.Size = UDim2.new(1, -35, 0, 30)
+Title.Position = UDim2.new(0,0,0,0)
+Title.BackgroundColor3 = Color3.fromRGB(40,40,40)
+Title.Text = "Spectator | CCTV"
+Title.TextColor3 = Color3.fromRGB(255,255,255)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 18
+Title.BorderSizePixel = 0
+Title.Parent = MainFrame
+
 local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0, 35, 0, 35)
-CloseBtn.Position = UDim2.new(1, -40, 0, 5)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
+CloseBtn.Size = UDim2.new(0,30,0,30)
+CloseBtn.Position = UDim2.new(1,-30,0,0)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
 CloseBtn.Text = "X"
 CloseBtn.TextColor3 = Color3.fromRGB(255,255,255)
 CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 20
-CloseBtn.Parent = Main
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0, 10)
-closeCorner.Parent = CloseBtn
+CloseBtn.TextSize = 16
+CloseBtn.BorderSizePixel = 0
+CloseBtn.Parent = MainFrame
 
--- Sections Positions
-local sectionY = {50, 120, 220, 320} -- Fly, Double Jump, Spectator, Admin Detect
+local DisplayLabel = Instance.new("TextLabel")
+DisplayLabel.Size = UDim2.new(1, -20, 0, 30)
+DisplayLabel.Position = UDim2.new(0, 10, 0, 40)
+DisplayLabel.BackgroundTransparency = 1
+DisplayLabel.Text = "Display: None"
+DisplayLabel.TextColor3 = Color3.fromRGB(255,255,255)
+DisplayLabel.Font = Enum.Font.GothamBold
+DisplayLabel.TextSize = 16
+DisplayLabel.TextXAlignment = Enum.TextXAlignment.Left
+DisplayLabel.Parent = MainFrame
 
--- ======= FLY SECTION =======
-local flyFrame = Instance.new("Frame")
-flyFrame.Size = UDim2.new(0, 250, 0, 150)
-flyFrame.Position = UDim2.new(0, 20, 0, sectionY[1])
-flyFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
-flyFrame.Parent = Main
-local flyCorner = Instance.new("UICorner")
-flyCorner.CornerRadius = UDim.new(0, 8)
-flyCorner.Parent = flyFrame
+local PlayerLabel = Instance.new("TextLabel")
+PlayerLabel.Size = UDim2.new(1, -20, 0, 30)
+PlayerLabel.Position = UDim2.new(0, 10, 0, 70)
+PlayerLabel.BackgroundTransparency = 1
+PlayerLabel.Text = "Target: None"
+PlayerLabel.TextColor3 = Color3.fromRGB(255,255,255)
+PlayerLabel.Font = Enum.Font.GothamBold
+PlayerLabel.TextSize = 16
+PlayerLabel.TextXAlignment = Enum.TextXAlignment.Left
+PlayerLabel.Parent = MainFrame
 
-local flyTitle = Instance.new("TextLabel")
-flyTitle.Size = UDim2.new(1,0,0,30)
-flyTitle.Position = UDim2.new(0,0,0,0)
-flyTitle.BackgroundTransparency = 1
-flyTitle.Text = "Fly | @NazamOfficial"
-flyTitle.TextColor3 = Color3.fromRGB(0,170,255)
-flyTitle.Font = Enum.Font.SourceSansBold
-flyTitle.TextSize = 22
-flyTitle.TextXAlignment = Enum.TextXAlignment.Left
-flyTitle.Parent = flyFrame
+local LeftBtn = Instance.new("TextButton")
+LeftBtn.Size = UDim2.new(0,50,0,30)
+LeftBtn.Position = UDim2.new(0, 20, 0, 120)
+LeftBtn.BackgroundColor3 = Color3.fromRGB(100,100,100)
+LeftBtn.Text = "<"
+LeftBtn.TextColor3 = Color3.fromRGB(255,255,255)
+LeftBtn.Font = Enum.Font.GothamBold
+LeftBtn.TextSize = 18
+LeftBtn.Parent = MainFrame
 
-local flyOnOff = Instance.new("TextButton")
-flyOnOff.Size = UDim2.new(0, 100, 0, 30)
-flyOnOff.Position = UDim2.new(0, 10, 0, 40)
-flyOnOff.Text = "TERBANG"
-flyOnOff.Font = Enum.Font.SourceSansBold
-flyOnOff.TextColor3 = Color3.fromRGB(255,255,255)
-flyOnOff.TextSize = 18
-flyOnOff.BackgroundColor3 = Color3.fromRGB(0,120,200)
-flyOnOff.Parent = flyFrame
+local RightBtn = Instance.new("TextButton")
+RightBtn.Size = UDim2.new(0,50,0,30)
+RightBtn.Position = UDim2.new(1,-70,0,120)
+RightBtn.BackgroundColor3 = Color3.fromRGB(100,100,100)
+RightBtn.Text = ">"
+RightBtn.TextColor3 = Color3.fromRGB(255,255,255)
+RightBtn.Font = Enum.Font.GothamBold
+RightBtn.TextSize = 18
+RightBtn.Parent = MainFrame
 
-local flyUp = Instance.new("TextButton")
-flyUp.Size = UDim2.new(0,100,0,30)
-flyUp.Position = UDim2.new(0,10,0,80)
-flyUp.Text = "NAIK"
-flyUp.Font = Enum.Font.SourceSansBold
-flyUp.TextColor3 = Color3.fromRGB(255,255,255)
-flyUp.TextSize = 18
-flyUp.BackgroundColor3 = Color3.fromRGB(0,170,255)
-flyUp.Parent = flyFrame
+local TPBtn = Instance.new("TextButton")
+TPBtn.Size = UDim2.new(0.6,0,0,35)
+TPBtn.Position = UDim2.new(0.2,0,0,150)
+TPBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
+TPBtn.Text = "Teleport"
+TPBtn.TextColor3 = Color3.fromRGB(0,0,0)
+TPBtn.Font = Enum.Font.GothamBold
+TPBtn.TextSize = 16
+TPBtn.Parent = MainFrame
 
-local flyDown = Instance.new("TextButton")
-flyDown.Size = UDim2.new(0,100,0,30)
-flyDown.Position = UDim2.new(0,120,0,80)
-flyDown.Text = "TURUN"
-flyDown.Font = Enum.Font.SourceSansBold
-flyDown.TextColor3 = Color3.fromRGB(255,255,255)
-flyDown.TextSize = 18
-flyDown.BackgroundColor3 = Color3.fromRGB(0,170,255)
-flyDown.Parent = flyFrame
+--// Variables
+local playersList = {}
+local index = 1
+local targetPlayer = nil
+local cameraFollowConnection = nil
 
--- Speed display
-local flySpeed = Instance.new("TextLabel")
-flySpeed.Size = UDim2.new(0,60,0,30)
-flySpeed.Position = UDim2.new(0,230-70,0,40)
-flySpeed.Text = "1"
-flySpeed.Font = Enum.Font.SourceSansBold
-flySpeed.TextColor3 = Color3.fromRGB(0,170,255)
-flySpeed.TextSize = 18
-flySpeed.BackgroundColor3 = Color3.fromRGB(40,40,40)
-flySpeed.BorderSizePixel = 1
-flySpeed.Parent = flyFrame
+--// Functions
+local function updateTargetText()
+	if targetPlayer then
+		DisplayLabel.Text = "Display: "..(targetPlayer.DisplayName or "None")
+		PlayerLabel.Text = "Target: "..(targetPlayer.Name or "None")
+	else
+		DisplayLabel.Text = "Display: None"
+		PlayerLabel.Text = "Target: None"
+	end
+end
 
-local flyPlus = Instance.new("TextButton")
-flyPlus.Size = UDim2.new(0,45,0,30)
-flyPlus.Position = UDim2.new(0,10,0,120)
-flyPlus.Text = "+"
-flyPlus.Font = Enum.Font.SourceSansBold
-flyPlus.TextColor3 = Color3.fromRGB(255,255,255)
-flyPlus.TextSize = 20
-flyPlus.BackgroundColor3 = Color3.fromRGB(0,170,255)
-flyPlus.Parent = flyFrame
+local function refreshPlayers()
+	playersList = {}
+	for _,plr in ipairs(Players:GetPlayers()) do
+		if plr ~= LocalPlayer then
+			table.insert(playersList, plr)
+		end
+	end
+	if #playersList > 0 then
+		index = 1
+		targetPlayer = playersList[index]
+	else
+		targetPlayer = nil
+	end
+	updateTargetText()
+end
 
-local flyMinus = Instance.new("TextButton")
-flyMinus.Size = UDim2.new(0,45,0,30)
-flyMinus.Position = UDim2.new(0,65,0,120)
-flyMinus.Text = "-"
-flyMinus.Font = Enum.Font.SourceSansBold
-flyMinus.TextColor3 = Color3.fromRGB(255,255,255)
-flyMinus.TextSize = 20
-flyMinus.BackgroundColor3 = Color3.fromRGB(0,170,255)
-flyMinus.Parent = flyFrame
+local function followCamera()
+	if cameraFollowConnection then
+		cameraFollowConnection:Disconnect()
+	end
+	cameraFollowConnection = game:GetService("RunService").RenderStepped:Connect(function()
+		if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+			Camera.CameraType = Enum.CameraType.Scriptable
+			Camera.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0,3,6)
+			Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPlayer.Character.HumanoidRootPart.Position)
+		end
+	end)
+end
 
--- Fly logic (100% same as original script) -- ADD HERE
-
--- ======= DOUBLE JUMP SECTION =======
-local jumpFrame = Instance.new("Frame")
-jumpFrame.Size = UDim2.new(0, 250, 0, 120)
-jumpFrame.Position = UDim2.new(0, 300, 0, sectionY[2])
-jumpFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
-jumpFrame.Parent = Main
-local jumpCorner = Instance.new("UICorner")
-jumpCorner.CornerRadius = UDim.new(0, 8)
-jumpCorner.Parent = jumpFrame
-
--- Add Double Jump Buttons and logic (same as original)
-
--- ======= SPECTATOR SECTION =======
-local spFrame = Instance.new("Frame")
-spFrame.Size = UDim2.new(0,250,0,150)
-spFrame.Position = UDim2.new(0, 20, 0, sectionY[3])
-spFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
-spFrame.Parent = Main
-local spCorner = Instance.new("UICorner")
-spCorner.CornerRadius = UDim.new(0, 8)
-spCorner.Parent = spFrame
-
--- Add Spectator buttons, target display and teleport logic (same as original)
-
--- ======= ADMIN DETECT SECTION =======
-local adFrame = Instance.new("Frame")
-adFrame.Size = UDim2.new(0,300,0,120)
-adFrame.Position = UDim2.new(0,300,0,sectionY[4])
-adFrame.BackgroundColor3 = Color3.fromRGB(50,50,50)
-adFrame.Parent = Main
-local adCorner = Instance.new("UICorner")
-adCorner.CornerRadius = UDim.new(0, 8)
-adCorner.Parent = adFrame
-
--- Add Admin Detect logic and display (same as original)
-
--- ======= MAIN CLOSE BUTTON LOGIC =======
+--// Buttons
 CloseBtn.MouseButton1Click:Connect(function()
-    Main.Visible = false
+	MainFrame.Visible = false
+	if cameraFollowConnection then
+		cameraFollowConnection:Disconnect()
+	end
+	Camera.CameraType = Enum.CameraType.Custom
 end)
 
--- Floating Button to reopen GUI if hidden (Optional)
+LeftBtn.MouseButton1Click:Connect(function()
+	if #playersList > 0 then
+		index = (index - 2) % #playersList + 1
+		targetPlayer = playersList[index]
+		updateTargetText()
+		followCamera()
+	end
+end)
+
+RightBtn.MouseButton1Click:Connect(function()
+	if #playersList > 0 then
+		index = index % #playersList + 1
+		targetPlayer = playersList[index]
+		updateTargetText()
+		followCamera()
+	end
+end)
+
+TPBtn.MouseButton1Click:Connect(function()
+	if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+		local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+		if root then
+			root.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
+		end
+	end
+end)
+
+Players.PlayerAdded:Connect(refreshPlayers)
+Players.PlayerRemoving:Connect(refreshPlayers)
+refreshPlayers()
+followCamera()
