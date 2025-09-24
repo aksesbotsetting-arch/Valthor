@@ -7,6 +7,13 @@ local Button1 = Instance.new("TextButton")
 local Button2 = Instance.new("TextButton")
 local Button3 = Instance.new("TextButton")
 local Button4 = Instance.new("TextButton")
+local StatusLabel = Instance.new("TextLabel")
+local SpeedLabel = Instance.new("TextLabel")
+local SpeedPlusButton = Instance.new("TextButton")
+local SpeedMinusButton = Instance.new("TextButton")
+local TeleportButton = Instance.new("TextButton")
+local AdminLabel = Instance.new("TextLabel")
+local StartButton = Instance.new("TextButton")
 
 -- Setting up ScreenGui
 ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
@@ -14,9 +21,9 @@ ScreenGui.Name = "AllMenuGui"
 
 -- Setting up MainFrame
 MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(34, 34, 34)  -- Dark gray background
+MainFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)  -- Dark gray background
 MainFrame.Position = UDim2.new(0.5, -250, 0.5, -200)  -- Center the frame
-MainFrame.Size = UDim2.new(0, 500, 0, 400)
+MainFrame.Size = UDim2.new(0, 550, 0, 450)
 MainFrame.BorderSizePixel = 2
 MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)  -- Black border
 
@@ -45,30 +52,83 @@ Icon.Size = UDim2.new(0, 40, 0, 40)
 Icon.Position = UDim2.new(0, 10, 0, 5)
 Icon.Image = "rbxassetid://12345678"  -- Ganti dengan ID asset gambar sesuai keinginan
 
--- Setting up Buttons
+-- Setting up Buttons (Fly, Spec + Tp, Cek Own/Admin, Infinite Jump)
 Button1.Parent = MainFrame
 Button1.BackgroundColor3 = Color3.fromRGB(51, 51, 51)  -- Dark gray button
 Button1.Position = UDim2.new(0, 10, 0, 60)
-Button1.Size = UDim2.new(1, -20, 0, 50)
+Button1.Size = UDim2.new(0, 250, 0, 50)
 Button1.Text = "Fly"
 
 Button2.Parent = MainFrame
 Button2.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
 Button2.Position = UDim2.new(0, 10, 0, 120)
-Button2.Size = UDim2.new(1, -20, 0, 50)
+Button2.Size = UDim2.new(0, 250, 0, 50)
 Button2.Text = "Spec + Tp"
 
 Button3.Parent = MainFrame
 Button3.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
 Button3.Position = UDim2.new(0, 10, 0, 180)
-Button3.Size = UDim2.new(1, -20, 0, 50)
+Button3.Size = UDim2.new(0, 250, 0, 50)
 Button3.Text = "Cek Own/Admin"
 
 Button4.Parent = MainFrame
 Button4.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
 Button4.Position = UDim2.new(0, 10, 0, 240)
-Button4.Size = UDim2.new(1, -20, 0, 50)
+Button4.Size = UDim2.new(0, 250, 0, 50)
 Button4.Text = "Infinite Jump"
+
+-- Setting up Status Label (for Infinite Jump)
+StatusLabel.Parent = MainFrame
+StatusLabel.BackgroundTransparency = 1
+StatusLabel.Position = UDim2.new(0, 270, 0, 60)
+StatusLabel.Size = UDim2.new(0, 250, 0, 50)
+StatusLabel.Text = "Infinite Jump: Off"
+StatusLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+StatusLabel.TextSize = 18
+
+-- Speed Settings
+SpeedLabel.Parent = MainFrame
+SpeedLabel.BackgroundTransparency = 1
+SpeedLabel.Position = UDim2.new(0, 270, 0, 120)
+SpeedLabel.Size = UDim2.new(0, 250, 0, 50)
+SpeedLabel.Text = "Speed: 16"
+SpeedLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+SpeedLabel.TextSize = 18
+
+SpeedPlusButton.Parent = MainFrame
+SpeedPlusButton.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
+SpeedPlusButton.Position = UDim2.new(0, 270, 0, 180)
+SpeedPlusButton.Size = UDim2.new(0, 50, 0, 50)
+SpeedPlusButton.Text = "+"
+
+SpeedMinusButton.Parent = MainFrame
+SpeedMinusButton.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
+SpeedMinusButton.Position = UDim2.new(0, 330, 0, 180)
+SpeedMinusButton.Size = UDim2.new(0, 50, 0, 50)
+SpeedMinusButton.Text = "-"
+
+-- Setting up Teleport Button
+TeleportButton.Parent = MainFrame
+TeleportButton.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
+TeleportButton.Position = UDim2.new(0, 270, 0, 240)
+TeleportButton.Size = UDim2.new(0, 250, 0, 50)
+TeleportButton.Text = "Teleport"
+
+-- Setting up Admin Info
+AdminLabel.Parent = MainFrame
+AdminLabel.BackgroundTransparency = 1
+AdminLabel.Position = UDim2.new(0, 270, 0, 300)
+AdminLabel.Size = UDim2.new(0, 250, 0, 50)
+AdminLabel.Text = "Admin: 0 | Owner: 0"
+AdminLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+AdminLabel.TextSize = 18
+
+-- Setting up Start Button
+StartButton.Parent = MainFrame
+StartButton.BackgroundColor3 = Color3.fromRGB(51, 51, 51)
+StartButton.Position = UDim2.new(0, 270, 0, 360)
+StartButton.Size = UDim2.new(0, 250, 0, 50)
+StartButton.Text = "Start"
 
 -- Close the GUI when X is clicked
 CloseButton.MouseButton1Click:Connect(function()
