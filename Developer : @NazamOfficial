@@ -1,184 +1,255 @@
---// Services
+-- SERVICES
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-
---// GUI
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "SpectatorGui"
-ScreenGui.Parent = game:GetService("CoreGui")
+local chr = LocalPlayer.Character
+local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+local ScreenGui = Instance.new("ScreenGui", game.Players.LocalPlayer.PlayerGui)
+ScreenGui.Name = "FiturGUI"
+ScreenGui.DisplayOrder = 10
 ScreenGui.ResetOnSpawn = false
 
-local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 300, 0, 180)
-MainFrame.Position = UDim2.new(0.5, -150, 0.5, -90)
-MainFrame.BackgroundColor3 = Color3.fromRGB(20,20,20)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
-MainFrame.Parent = ScreenGui
-
-local UICorner = Instance.new("UICorner")
-UICorner.CornerRadius = UDim.new(0, 10)
-UICorner.Parent = MainFrame
-
-local Title = Instance.new("TextLabel")
-Title.Size = UDim2.new(1, -35, 0, 30)
-Title.Position = UDim2.new(0,0,0,0)
-Title.BackgroundColor3 = Color3.fromRGB(40,40,40)
-Title.Text = "Spectator | CCTV"
-Title.TextColor3 = Color3.fromRGB(255,255,255)
-Title.Font = Enum.Font.GothamBold
-Title.TextSize = 18
-Title.BorderSizePixel = 0
-Title.Parent = MainFrame
-
-local CloseBtn = Instance.new("TextButton")
-CloseBtn.Size = UDim2.new(0,30,0,30)
-CloseBtn.Position = UDim2.new(1,-30,0,0)
-CloseBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
-CloseBtn.Text = "X"
-CloseBtn.TextColor3 = Color3.fromRGB(255,255,255)
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = 16
-CloseBtn.BorderSizePixel = 0
-CloseBtn.Parent = MainFrame
-
-local DisplayLabel = Instance.new("TextLabel")
-DisplayLabel.Size = UDim2.new(1, -20, 0, 30)
-DisplayLabel.Position = UDim2.new(0, 10, 0, 40)
-DisplayLabel.BackgroundTransparency = 1
-DisplayLabel.Text = "Display: None"
-DisplayLabel.TextColor3 = Color3.fromRGB(255,255,255)
-DisplayLabel.Font = Enum.Font.GothamBold
-DisplayLabel.TextSize = 16
-DisplayLabel.TextXAlignment = Enum.TextXAlignment.Left
-DisplayLabel.Parent = MainFrame
-
-local PlayerLabel = Instance.new("TextLabel")
-PlayerLabel.Size = UDim2.new(1, -20, 0, 30)
-PlayerLabel.Position = UDim2.new(0, 10, 0, 70)
-PlayerLabel.BackgroundTransparency = 1
-PlayerLabel.Text = "Target: None"
-PlayerLabel.TextColor3 = Color3.fromRGB(255,255,255)
-PlayerLabel.Font = Enum.Font.GothamBold
-PlayerLabel.TextSize = 16
-PlayerLabel.TextXAlignment = Enum.TextXAlignment.Left
-PlayerLabel.Parent = MainFrame
-
-local LeftBtn = Instance.new("TextButton")
-LeftBtn.Size = UDim2.new(0,50,0,30)
-LeftBtn.Position = UDim2.new(0, 20, 0, 120)
-LeftBtn.BackgroundColor3 = Color3.fromRGB(100,100,100)
-LeftBtn.Text = "<"
-LeftBtn.TextColor3 = Color3.fromRGB(255,255,255)
-LeftBtn.Font = Enum.Font.GothamBold
-LeftBtn.TextSize = 18
-LeftBtn.Parent = MainFrame
-
-local RightBtn = Instance.new("TextButton")
-RightBtn.Size = UDim2.new(0,50,0,30)
-RightBtn.Position = UDim2.new(1,-70,0,120)
-RightBtn.BackgroundColor3 = Color3.fromRGB(100,100,100)
-RightBtn.Text = ">"
-RightBtn.TextColor3 = Color3.fromRGB(255,255,255)
-RightBtn.Font = Enum.Font.GothamBold
-RightBtn.TextSize = 18
-RightBtn.Parent = MainFrame
-
-local TPBtn = Instance.new("TextButton")
-TPBtn.Size = UDim2.new(0.6,0,0,35)
-TPBtn.Position = UDim2.new(0.2,0,0,150)
-TPBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
-TPBtn.Text = "Teleport"
-TPBtn.TextColor3 = Color3.fromRGB(0,0,0)
-TPBtn.Font = Enum.Font.GothamBold
-TPBtn.TextSize = 16
-TPBtn.Parent = MainFrame
-
---// Variables
-local playersList = {}
-local index = 1
-local targetPlayer = nil
-local cameraFollowConnection = nil
-
---// Functions
-local function updateTargetText()
-	if targetPlayer then
-		DisplayLabel.Text = "Display: "..(targetPlayer.DisplayName or "None")
-		PlayerLabel.Text = "Target: "..(targetPlayer.Name or "None")
-	else
-		DisplayLabel.Text = "Display: None"
-		PlayerLabel.Text = "Target: None"
-	end
+-- GUI BUTTON CREATION FUNCTION
+local function createButton(name, position, size, parent, callback)
+    local button = Instance.new("TextButton")
+    button.Name = name
+    button.Position = position
+    button.Size = size
+    button.BackgroundColor3 = Color3.fromRGB(50, 50, 255)
+    button.TextColor3 = Color3.fromRGB(255, 255, 255)
+    button.Text = name
+    button.Font = Enum.Font.SourceSans
+    button.TextSize = 18
+    button.Parent = parent
+    button.MouseButton1Click:Connect(callback)
+    return button
 end
 
-local function refreshPlayers()
-	playersList = {}
-	for _,plr in ipairs(Players:GetPlayers()) do
-		if plr ~= LocalPlayer then
-			table.insert(playersList, plr)
-		end
-	end
-	if #playersList > 0 then
-		index = 1
-		targetPlayer = playersList[index]
-	else
-		targetPlayer = nil
-	end
-	updateTargetText()
+-- VARIABLES
+local FlySpeed = 1
+local FlyActive = false
+local TPWalking = false
+local DoubleJump = false
+local CanDoubleJump = false
+local WalkSpeed = 16
+local OwnerKeywords = {"owner","dev","developer","pemilik"}
+local AdminKeywords = {"admin","penjaga","moderator","staff","superadmin","coadmin"}
+
+-- ========================
+-- FLY SYSTEM
+-- ========================
+local function setupFly()
+    FlyActive = false
+    TPWalking = false
+
+    local function enableFly()
+        FlyActive = true
+        hum:SetStateEnabled(Enum.HumanoidStateType.Climbing,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Flying,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Freefall,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.GettingUp,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Jumping,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Landed,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Physics,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Running,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Seated,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,false)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Swimming,false)
+        hum:ChangeState(Enum.HumanoidStateType.Swimming)
+
+        -- TP Walking logic
+        spawn(function()
+            local hb = RunService.Heartbeat
+            TPWalking = true
+            while TPWalking and chr and hum and hum.Parent do
+                if hum.MoveDirection.Magnitude > 0 then
+                    chr:TranslateBy(hum.MoveDirection * FlySpeed)
+                end
+                hb:Wait()
+            end
+        end)
+    end
+
+    local function disableFly()
+        FlyActive = false
+        hum:SetStateEnabled(Enum.HumanoidStateType.Climbing,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.FallingDown,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Flying,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Freefall,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.GettingUp,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Jumping,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Landed,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Physics,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Running,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Seated,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,true)
+        hum:SetStateEnabled(Enum.HumanoidStateType.Swimming,true)
+        hum:ChangeState(Enum.HumanoidStateType.RunningNoPhysics)
+        TPWalking = false
+    end
+
+    local function flyUp()
+        if chr and chr:FindFirstChild("HumanoidRootPart") then
+            chr.HumanoidRootPart.CFrame = chr.HumanoidRootPart.CFrame + Vector3.new(0,1,0)
+        end
+    end
+
+    local function flyDown()
+        if chr and chr:FindFirstChild("HumanoidRootPart") then
+            chr.HumanoidRootPart.CFrame = chr.HumanoidRootPart.CFrame + Vector3.new(0,-1,0)
+        end
+    end
+
+    local function increaseFlySpeed()
+        FlySpeed = FlySpeed + 1
+    end
+
+    local function decreaseFlySpeed()
+        if FlySpeed > 1 then
+            FlySpeed = FlySpeed - 1
+        end
+    end
+
+    return enableFly, disableFly, flyUp, flyDown, increaseFlySpeed, decreaseFlySpeed
 end
 
-local function followCamera()
-	if cameraFollowConnection then
-		cameraFollowConnection:Disconnect()
-	end
-	cameraFollowConnection = game:GetService("RunService").RenderStepped:Connect(function()
-		if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-			Camera.CameraType = Enum.CameraType.Scriptable
-			Camera.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0,3,6)
-			Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPlayer.Character.HumanoidRootPart.Position)
-		end
-	end)
+local EnableFly, DisableFly, FlyUp, FlyDown, FlySpeedUp, FlySpeedDown = setupFly()
+
+-- ========================
+-- SPECTATOR / TELEPORT SYSTEM
+-- ========================
+local PlayersList = {}
+local Index = 1
+local TargetPlayer = nil
+local CameraFollowConn = nil
+
+local function RefreshPlayers()
+    PlayersList = {}
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer then
+            table.insert(PlayersList, plr)
+        end
+    end
+    if #PlayersList > 0 then
+        Index = 1
+        TargetPlayer = PlayersList[Index]
+    else
+        TargetPlayer = nil
+    end
 end
 
---// Buttons
-CloseBtn.MouseButton1Click:Connect(function()
-	MainFrame.Visible = false
-	if cameraFollowConnection then
-		cameraFollowConnection:Disconnect()
-	end
-	Camera.CameraType = Enum.CameraType.Custom
+local function FollowCamera()
+    if CameraFollowConn then
+        CameraFollowConn:Disconnect()
+    end
+    CameraFollowConn = RunService.RenderStepped:Connect(function()
+        if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            Camera.CameraType = Enum.CameraType.Scriptable
+            Camera.CFrame = TargetPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0,3,6)
+            Camera.CFrame = CFrame.new(Camera.CFrame.Position, TargetPlayer.Character.HumanoidRootPart.Position)
+        end
+    end)
+end
+
+local function TeleportToTarget()
+    if TargetPlayer and TargetPlayer.Character and TargetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        local root = chr:FindFirstChild("HumanoidRootPart")
+        if root then
+            root.CFrame = TargetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
+        end
+    end
+end
+
+-- ========================
+-- ADMIN / OWNER DETECT
+-- ========================
+local function IsOwner(player)
+    local title = player:FindFirstChild("Title")
+    if title and title:IsA("StringValue") then
+        local text = title.Value:lower()
+        for _, keyword in ipairs(OwnerKeywords) do
+            if text:find(keyword) then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+local function IsAdmin(player)
+    local title = player:FindFirstChild("Title")
+    if title and title:IsA("StringValue") then
+        local text = title.Value:lower()
+        for _, keyword in ipairs(AdminKeywords) do
+            if text:find(keyword) then
+                return true
+            end
+        end
+    end
+    return false
+end
+
+-- ========================
+-- INFINITE JUMP + SPEED SYSTEM
+-- ========================
+local function SetupCharacter(character)
+    chr = character
+    hum = chr:WaitForChild("Humanoid")
+    hum.WalkSpeed = WalkSpeed
+
+    local function OnStateChanged(_, newState)
+        if newState == Enum.HumanoidStateType.Freefall then
+            if DoubleJump then
+                CanDoubleJump = true
+            end
+        elseif newState == Enum.HumanoidStateType.Landed then
+            CanDoubleJump = false
+        end
+    end
+
+    hum.StateChanged:Connect(OnStateChanged)
+
+    UserInputService.JumpRequest:Connect(function()
+        if hum and hum:GetState() == Enum.HumanoidStateType.Freefall and CanDoubleJump then
+            hum:ChangeState(Enum.HumanoidStateType.Jumping)
+            CanDoubleJump = false
+        end
+    end)
+end
+
+if chr then
+    SetupCharacter(chr)
+end
+LocalPlayer.CharacterAdded:Connect(SetupCharacter)
+
+-- ========================
+-- GUI BUTTONS CONNECTIONS
+-- ========================
+createButton("Fly ON", UDim2.new(0, 10, 0, 50), UDim2.new(0, 150, 0, 50), ScreenGui, EnableFly)
+createButton("Fly OFF", UDim2.new(0, 10, 0, 110), UDim2.new(0, 150, 0, 50), ScreenGui, DisableFly)
+createButton("Fly Up", UDim2.new(0, 170, 0, 50), UDim2.new(0, 150, 0, 50), ScreenGui, FlyUp)
+createButton("Fly Down", UDim2.new(0, 170, 0, 110), UDim2.new(0, 150, 0, 50), ScreenGui, FlyDown)
+createButton("Increase Speed", UDim2.new(0, 330, 0, 50), UDim2.new(0, 150, 0, 50), ScreenGui, FlySpeedUp)
+createButton("Decrease Speed", UDim2.new(0, 330, 0, 110), UDim2.new(0, 150, 0, 50), ScreenGui, FlySpeedDown)
+
+createButton("Spectator", UDim2.new(0, 10, 0, 170), UDim2.new(0, 150, 0, 50), ScreenGui, RefreshPlayers)
+createButton("Teleport", UDim2.new(0, 170, 0, 170), UDim2.new(0, 150, 0, 50), ScreenGui, TeleportToTarget)
+createButton("Follow Player", UDim2.new(0, 330, 0, 170), UDim2.new(0, 150, 0, 50), ScreenGui, FollowCamera)
+
+createButton("Check Admin", UDim2.new(0, 10, 0, 230), UDim2.new(0, 150, 0, 50), ScreenGui, function()
+    local owners, admins = UpdateAdminCounts()
+    print("Admins: " .. admins)
+    print("Owners: " .. owners)
 end)
 
-LeftBtn.MouseButton1Click:Connect(function()
-	if #playersList > 0 then
-		index = (index - 2) % #playersList + 1
-		targetPlayer = playersList[index]
-		updateTargetText()
-		followCamera()
-	end
-end)
-
-RightBtn.MouseButton1Click:Connect(function()
-	if #playersList > 0 then
-		index = index % #playersList + 1
-		targetPlayer = playersList[index]
-		updateTargetText()
-		followCamera()
-	end
-end)
-
-TPBtn.MouseButton1Click:Connect(function()
-	if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-		local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-		if root then
-			root.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
-		end
-	end
-end)
-
-Players.PlayerAdded:Connect(refreshPlayers)
-Players.PlayerRemoving:Connect(refreshPlayers)
-refreshPlayers()
-followCamera()
+-- Add ScreenGui to Player
+ScreenGui.Parent = game.Players.LocalPlayer.PlayerGui
