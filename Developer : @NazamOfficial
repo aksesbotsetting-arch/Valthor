@@ -1,177 +1,524 @@
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.Name = "AllMenuGui"
+-- KS Brutal Toolkit (features 1-6 + 8)
+-- Author: helper
+-- WARNING: Use only in private/testing environments.
 
--- Frame utama
-local MainFrame = Instance.new("Frame")
-MainFrame.Parent = ScreenGui
-MainFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
-MainFrame.Position = UDim2.new(0.5, -300, 0.5, -200)
-MainFrame.Size = UDim2.new(0, 600, 0, 400)
-MainFrame.BorderSizePixel = 0
-MainFrame.Active = true
-MainFrame.Draggable = true
+-- Services
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local Debris = game:GetService("Debris")
+local TweenService = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
 
--- Judul Frame
-local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Parent = MainFrame
-TitleLabel.BackgroundTransparency = 1
-TitleLabel.Size = UDim2.new(1, 0, 0, 40)
-TitleLabel.Text = "All Features | @NazamOfficial"
-TitleLabel.TextColor3 = Color3.fromRGB(0, 0, 0)  -- Hitam
-TitleLabel.TextSize = 24
-TitleLabel.Font = Enum.Font.SourceSansBold
-TitleLabel.TextXAlignment = Enum.TextXAlignment.Center
-TitleLabel.Position = UDim2.new(0, 0, 0, 0)
+local player = Players.LocalPlayer
+local PlayerGui = player:WaitForChild("PlayerGui")
 
--- Tombol Close
-local CloseButton = Instance.new("TextButton")
-CloseButton.Parent = MainFrame
-CloseButton.BackgroundColor3 = Color3.fromRGB(255, 50, 50)  -- Merah
-CloseButton.Position = UDim2.new(1, -40, 0, 5)
-CloseButton.Size = UDim2.new(0, 30, 0, 30)
-CloseButton.Text = "X"
-CloseButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
-CloseButton.TextSize = 18
-CloseButton.TextFont = Enum.Font.SourceSansBold
-CloseButton.BorderSizePixel = 0
+-- ====== UI BUILD ======
+local screen = Instance.new("ScreenGui")
+screen.Name = "KS_BrutalUI"
+screen.ResetOnSpawn = false
+screen.Parent = PlayerGui
+screen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Tombol Fly
-local FlyButton = Instance.new("TextButton")
-FlyButton.Parent = MainFrame
-FlyButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)  -- Biru
-FlyButton.Position = UDim2.new(0, 50, 0, 60)
-FlyButton.Size = UDim2.new(0, 200, 0, 40)
-FlyButton.Text = "Fly"
-FlyButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
-FlyButton.TextSize = 18
-FlyButton.TextFont = Enum.Font.SourceSansBold
+-- Main frame
+local Main = Instance.new("Frame")
+Main.Name = "Main"
+Main.Size = UDim2.new(0, 420, 0, 320)
+Main.Position = UDim2.new(0.5, -210, 0.5, -160)
+Main.BackgroundColor3 = Color3.fromRGB(50,50,50) -- abu dominan
+Main.BorderSizePixel = 0
+Main.Parent = screen
 
--- Tombol Infinite Jump
-local InfiniteJumpButton = Instance.new("TextButton")
-InfiniteJumpButton.Parent = MainFrame
-InfiniteJumpButton.BackgroundColor3 = Color3.fromRGB(0, 255, 0)  -- Hijau
-InfiniteJumpButton.Position = UDim2.new(0, 50, 0, 120)
-InfiniteJumpButton.Size = UDim2.new(0, 200, 0, 40)
-InfiniteJumpButton.Text = "Infinite Jump"
-InfiniteJumpButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
-InfiniteJumpButton.TextSize = 18
-InfiniteJumpButton.TextFont = Enum.Font.SourceSansBold
+local mainCorner = Instance.new("UICorner", Main)
+mainCorner.CornerRadius = UDim.new(0, 16)
 
--- Tombol Spectator
-local SpectatorButton = Instance.new("TextButton")
-SpectatorButton.Parent = MainFrame
-SpectatorButton.BackgroundColor3 = Color3.fromRGB(255, 255, 0)  -- Kuning
-SpectatorButton.Position = UDim2.new(0, 50, 0, 180)
-SpectatorButton.Size = UDim2.new(0, 200, 0, 40)
-SpectatorButton.Text = "Spectator Mode"
-SpectatorButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
-SpectatorButton.TextSize = 18
-SpectatorButton.TextFont = Enum.Font.SourceSansBold
+local stroke = Instance.new("UIStroke", Main)
+stroke.Thickness = 1.5
+stroke.Color = Color3.fromRGB(230,230,230)
+stroke.Transparency = 0.65
 
--- Tombol Admin Detection
-local AdminDetectButton = Instance.new("TextButton")
-AdminDetectButton.Parent = MainFrame
-AdminDetectButton.BackgroundColor3 = Color3.fromRGB(255, 0, 0)  -- Merah
-AdminDetectButton.Position = UDim2.new(0, 50, 0, 240)
-AdminDetectButton.Size = UDim2.new(0, 200, 0, 40)
-AdminDetectButton.Text = "Admin Detection"
-AdminDetectButton.TextColor3 = Color3.fromRGB(255, 255, 255)  -- Putih
-AdminDetectButton.TextSize = 18
-AdminDetectButton.TextFont = Enum.Font.SourceSansBold
+local grad = Instance.new("UIGradient", Main)
+grad.Color = ColorSequence.new{
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(45,45,45)),
+    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(100,100,100)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(210,210,210))
+}
+grad.Rotation = 0
 
--- Animasi untuk tombol saat di klik
-local function buttonClickAnimation(button)
-    local originalSize = button.Size
-    local originalPos = button.Position
-    button:TweenSize(UDim2.new(0, 210, 0, 45), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
-    button:TweenPosition(UDim2.new(0, 50, 0, button.Position.Y.Offset - 5), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
-    wait(0.1)
-    button:TweenSize(originalSize, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
-    button:TweenPosition(originalPos, Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.1, true)
+-- Title + subtitle
+local Title = Instance.new("TextLabel", Main)
+Title.Size = UDim2.new(1, -80, 0, 46)
+Title.Position = UDim2.new(0, 20, 0, 12)
+Title.BackgroundTransparency = 1
+Title.Text = "KS Brutal Toolkit"
+Title.TextColor3 = Color3.fromRGB(245,245,245)
+Title.Font = Enum.Font.GothamBold
+Title.TextSize = 26
+Title.TextXAlignment = Enum.TextXAlignment.Left
+
+local Sub = Instance.new("TextLabel", Main)
+Sub.Size = UDim2.new(1, -80, 0, 20)
+Sub.Position = UDim2.new(0, 20, 0, 46)
+Sub.BackgroundTransparency = 1
+Sub.Text = "hitam • abu • putih — gunakan di private server"
+Sub.TextColor3 = Color3.fromRGB(200,200,200)
+Sub.Font = Enum.Font.Gotham
+Sub.TextSize = 14
+Sub.TextXAlignment = Enum.TextXAlignment.Left
+
+-- Close button (X)
+local CloseBtn = Instance.new("TextButton", Main)
+CloseBtn.Size = UDim2.new(0, 40, 0, 36)
+CloseBtn.Position = UDim2.new(1, -52, 0, 12)
+CloseBtn.Text = "X"
+CloseBtn.Font = Enum.Font.GothamBold
+CloseBtn.TextSize = 20
+CloseBtn.TextColor3 = Color3.fromRGB(255,255,255)
+CloseBtn.BackgroundColor3 = Color3.fromRGB(35,35,35)
+local closeCorner = Instance.new("UICorner", CloseBtn) closeCorner.CornerRadius = UDim.new(0,8)
+
+-- Mini floating KS button (will show when closed)
+local KSBtn = Instance.new("TextButton", screen)
+KSBtn.Size = UDim2.new(0,45,0,45) -- requested size
+KSBtn.Position = UDim2.new(0, 16, 0.78, 0)
+KSBtn.Text = "KS"
+KSBtn.Font = Enum.Font.GothamBold
+KSBtn.TextSize = 16
+KSBtn.TextColor3 = Color3.fromRGB(255,255,255)
+KSBtn.BackgroundColor3 = Color3.fromRGB(20,20,20)
+local ksCorner = Instance.new("UICorner", KSBtn) ksCorner.CornerRadius = UDim.new(1,0)
+KSBtn.Visible = false
+
+-- small helper frame for buttons area
+local btnHolder = Instance.new("Frame", Main)
+btnHolder.Size = UDim2.new(1, -40, 0, 200)
+btnHolder.Position = UDim2.new(0, 20, 0, 80)
+btnHolder.BackgroundTransparency = 1
+
+-- function for creating toggle buttons (white background style)
+local function makeToggle(labelText, yOffset)
+    local btn = Instance.new("TextButton", btnHolder)
+    btn.Size = UDim2.new(0.48, 0, 0, 46)
+    btn.Position = UDim2.new(0, (yOffset%2==0) and 0 or (btnHolder.AbsoluteSize.X*0.52), math.floor(yOffset/2)*56)
+    btn.BackgroundColor3 = Color3.fromRGB(255,255,255)
+    btn.TextColor3 = Color3.fromRGB(25,25,25)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = 16
+    btn.Text = labelText
+    local c = Instance.new("UICorner", btn) c.CornerRadius = UDim.new(0,8)
+    return btn
 end
 
-FlyButton.MouseButton1Click:Connect(function()
-    buttonClickAnimation(FlyButton)
-    -- Fly Feature Code
-    local player = game.Players.LocalPlayer
-    local character = player.Character
-    local humanoid = character:WaitForChild("Humanoid")
-    local torso = character:WaitForChild("Torso")
-    
-    local bodyGyro = Instance.new("BodyGyro", torso)
-    local bodyVelocity = Instance.new("BodyVelocity", torso)
-    
-    bodyGyro.MaxTorque = Vector3.new(400000, 400000, 400000)
-    bodyGyro.CFrame = torso.CFrame
-    bodyVelocity.MaxForce = Vector3.new(400000, 400000, 400000)
-    
-    bodyVelocity.Velocity = Vector3.new(0, 50, 0)  -- Fly up velocity
+-- Create toggles for features:
+-- 1 = Repel, 2 = Gravity, 3 = Random TP All, 4 = Freeze (fake kill), 5 = Force Sit, 6 = Teleport All (we will make "Teleport All to me"), 8 = Size Modifier
+local RepelBtn = makeToggle("Repel: OFF", 0)
+local GravityBtn = makeToggle("Gravity: Normal", 1)
+local RandTPBtn = makeToggle("RandomTP All", 2)
+local FreezeBtn = makeToggle("Freeze: OFF", 3)
+local SitBtn = makeToggle("Force Sit: OFF", 4)
+local TPAllBtn = makeToggle("Bring All", 5)
+local SizeBtn = makeToggle("Size x1.0", 6)
 
-    -- To stop flying
-    -- bodyGyro:Destroy()
-    -- bodyVelocity:Destroy()
+-- sliders / inputs (radius, force, size scale)
+local labelSmall = Instance.new("TextLabel", Main)
+labelSmall.Size = UDim2.new(1, -40, 0, 18)
+labelSmall.Position = UDim2.new(0, 20, 0, 290)
+labelSmall.BackgroundTransparency = 1
+labelSmall.Font = Enum.Font.Gotham
+labelSmall.TextSize = 12
+labelSmall.TextColor3 = Color3.fromRGB(210,210,210)
+labelSmall.Text = "Repel radius: 10 | force:100 | Size scale:1.0"
+
+-- ====== CORE VARIABLES ======
+local repelOn = false
+local repelRadius = 10
+local repelForce = 100
+local gravityMode = "normal" -- "normal" or "low" or "high"
+local freezeOn = false
+local sitOn = false
+local sizeScale = 1.0
+
+-- keep track of frozen players states to restore
+local originalStats = {} -- player.UserId -> {walk, jump, anchoredParts?}
+local originalSizes = {} -- player.UserId -> map of part -> original size
+
+-- utility: safe get HRP & Humanoid
+local function getCharParts(p)
+    if not p or not p.Character then return nil end
+    local c = p.Character
+    local hrp = c:FindFirstChild("HumanoidRootPart")
+    local hum = c:FindFirstChildWhichIsA("Humanoid")
+    return c, hrp, hum
+end
+
+-- draggable implementation for KSBtn & Main
+local function makeDraggable(frame)
+    local dragging, dragInput, dragStart, startPos
+    frame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            dragging = true
+            dragStart = input.Position
+            startPos = frame.Position
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
+        end
+    end)
+    frame.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+            dragInput = input
+        end
+    end)
+    UserInputService.InputChanged:Connect(function(input)
+        if input == dragInput and dragging then
+            local delta = input.Position - dragStart
+            frame.Position = UDim2.new(
+                startPos.X.Scale,
+                startPos.X.Offset + delta.X,
+                startPos.Y.Scale,
+                startPos.Y.Offset + delta.Y
+            )
+        end
+    end)
+end
+makeDraggable(KSBtn)
+makeDraggable(Main)
+
+-- Blur background when open
+local blur = Instance.new("BlurEffect")
+blur.Size = 0
+blur.Parent = Lighting
+
+local function openUI()
+    -- blur in + animate main
+    KSBtn.Visible = false
+    Main.Visible = true
+    TweenService:Create(blur, TweenInfo.new(0.45, Enum.EasingStyle.Sine), {Size = 16}):Play()
+    -- pop scale
+    Main.Size = UDim2.new(0, 0, 0, 0)
+    TweenService:Create(Main, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = UDim2.new(0,420,0,320)}):Play()
+end
+
+local function closeUI()
+    -- blur out + shrink
+    TweenService:Create(blur, TweenInfo.new(0.35, Enum.EasingStyle.Sine), {Size = 0}):Play()
+    local tw = TweenService:Create(Main, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Size = UDim2.new(0,0,0,0)})
+    tw:Play()
+    tw.Completed:Wait()
+    Main.Visible = false
+    KSBtn.Visible = true
+end
+
+-- init visible
+Main.Visible = true
+KSBtn.Visible = false
+
+CloseBtn.MouseButton1Click:Connect(function()
+    closeUI()
+end)
+KSBtn.MouseButton1Click:Connect(function()
+    openUI()
 end)
 
-InfiniteJumpButton.MouseButton1Click:Connect(function()
-    buttonClickAnimation(InfiniteJumpButton)
-    -- Infinite Jump Code
-    local player = game.Players.LocalPlayer
-    local humanoid = player.Character:WaitForChild("Humanoid")
-    local jumpCount = 0
-
-    humanoid.StateChanged:Connect(function(_, newState)
-        if newState == Enum.HumanoidStateType.Freefall then
-            if jumpCount < 1 then
-                humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
-                jumpCount = jumpCount + 1
+-- small helper: iterate other players (excluding local)
+local function forEachOther(fn)
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player then
+            local ok, c, hrp, hum = pcall(function() return getCharParts(plr) end)
+            if ok then
+                c, hrp, hum = getCharParts(plr)
+                if c and hrp and hum then
+                    pcall(fn, plr, c, hrp, hum)
+                end
             end
-        elseif newState == Enum.HumanoidStateType.Landed then
-            jumpCount = 0
+        end
+    end
+end
+
+-- FEATURE 1: REPEL
+RepelBtn.MouseButton1Click:Connect(function()
+    repelOn = not repelOn
+    if repelOn then
+        RepelBtn.Text = "Repel: ON"
+        RepelBtn.BackgroundColor3 = Color3.fromRGB(180,255,180)
+    else
+        RepelBtn.Text = "Repel: OFF"
+        RepelBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
+    end
+end)
+
+-- FEATURE 2: GRAVITY toggle (local toggle affects whole workspace gravity)
+GravityBtn.MouseButton1Click:Connect(function()
+    if gravityMode == "normal" then
+        gravityMode = "low"
+        GravityBtn.Text = "Gravity: Low"
+        TweenService:Create(blur, TweenInfo.new(0.2), {Size = blur.Size}):Play()
+        workspace.Gravity = 30 -- lower gravity
+    elseif gravityMode == "low" then
+        gravityMode = "high"
+        GravityBtn.Text = "Gravity: High"
+        workspace.Gravity = 200 -- high gravity
+    else
+        gravityMode = "normal"
+        GravityBtn.Text = "Gravity: Normal"
+        workspace.Gravity = 196.2 -- default
+    end
+end)
+
+-- FEATURE 3: RANDOM TELEPORT ALL (one-shot)
+RandTPBtn.MouseButton1Click:Connect(function()
+    RandTPBtn.Text = "RandomTP All"
+    -- teleport others to random coords around origin (y set to 50 so they drop)
+    forEachOther(function(plr, c, hrp, hum)
+        -- generate random around where they are within 80 studs
+        local rx = hrp.Position.X + math.random(-80,80)
+        local rz = hrp.Position.Z + math.random(-80,80)
+        local ry = hrp.Position.Y + 40 -- teleport upwards so they fall
+        -- attempt set
+        pcall(function()
+            hrp.CFrame = CFrame.new(rx, ry, rz)
+        end)
+    end)
+end)
+
+-- FEATURE 4: FREEZE (fake kill / freeze in place) toggle
+FreezeBtn.MouseButton1Click:Connect(function()
+    freezeOn = not freezeOn
+    if freezeOn then
+        FreezeBtn.Text = "Freeze: ON"
+        FreezeBtn.BackgroundColor3 = Color3.fromRGB(180,255,180)
+        -- apply freeze: set walkspeed/jump to 0 (store originals)
+        forEachOther(function(plr, c, hrp, hum)
+            local id = plr.UserId
+            if not originalStats[id] then
+                originalStats[id] = {walk = hum.WalkSpeed, jump = hum.JumpPower}
+            end
+            pcall(function()
+                hum.WalkSpeed = 0
+                hum.JumpPower = 0
+            end)
+        end)
+    else
+        FreezeBtn.Text = "Freeze: OFF"
+        FreezeBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
+        -- restore
+        forEachOther(function(plr, c, hrp, hum)
+            local id = plr.UserId
+            if originalStats[id] then
+                pcall(function()
+                    hum.WalkSpeed = originalStats[id].walk or 16
+                    hum.JumpPower = originalStats[id].jump or 50
+                end)
+                originalStats[id] = nil
+            end
+        end)
+    end
+end)
+
+-- FEATURE 5: FORCE SIT toggle
+SitBtn.MouseButton1Click:Connect(function()
+    sitOn = not sitOn
+    if sitOn then
+        SitBtn.Text = "Force Sit: ON"
+        SitBtn.BackgroundColor3 = Color3.fromRGB(180,255,180)
+        forEachOther(function(plr, c, hrp, hum)
+            pcall(function() hum.Sit = true end)
+        end)
+    else
+        SitBtn.Text = "Force Sit: OFF"
+        SitBtn.BackgroundColor3 = Color3.fromRGB(255,255,255)
+        forEachOther(function(plr, c, hrp, hum)
+            pcall(function() hum.Sit = false end)
+        end)
+    end
+end)
+
+-- FEATURE 6: BRING/TELEPORT ALL TO ME (one-shot)
+TPAllBtn.MouseButton1Click:Connect(function()
+    TPAllBtn.Text = "Bringing..."
+    local myChar = player.Character
+    if not myChar then return end
+    local myHRP = myChar:FindFirstChild("HumanoidRootPart")
+    if not myHRP then return end
+    forEachOther(function(plr, c, hrp, hum)
+        pcall(function()
+            hrp.CFrame = myHRP.CFrame + Vector3.new(math.random(-3,3),0,math.random(-3,3))
+        end)
+    end)
+    TPAllBtn.Text = "Bring All"
+end)
+
+-- FEATURE 8: SIZE MODIFIER (toggle between x1 and x2 and x0.5)
+SizeBtn.MouseButton1Click:Connect(function()
+    if math.abs(sizeScale - 1.0) < 0.01 then
+        sizeScale = 1.8
+    elseif math.abs(sizeScale - 1.8) < 0.01 then
+        sizeScale = 0.6
+    else
+        sizeScale = 1.0
+    end
+    SizeBtn.Text = ("Size x%.2f"):format(sizeScale)
+    -- apply to all other players (attempt)
+    forEachOther(function(plr, c, hrp, hum)
+        local id = plr.UserId
+        -- store originals if not stored
+        if not originalSizes[id] then
+            originalSizes[id] = {}
+            for _, part in ipairs(c:GetChildren()) do
+                if part:IsA("BasePart") then
+                    originalSizes[id][part] = part.Size
+                end
+            end
+        end
+        -- apply scale
+        pcall(function()
+            for part, origSize in pairs(originalSizes[id]) do
+                if part and part.Parent then
+                    part.Size = origSize * sizeScale
+                end
+            end
+        end)
+    end)
+end)
+
+-- ====== REPULSION LOOP (BodyVelocity) ======
+-- use short cooldown per targeted player to avoid spam
+local repelCooldowns = {}
+
+RunService.Heartbeat:Connect(function()
+    -- update lists maybe used by some toggles
+    if repelOn then
+        local myChar = player.Character
+        if not myChar then return end
+        local myHRP = myChar:FindFirstChild("HumanoidRootPart")
+        if not myHRP then return end
+
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= player and plr.Character then
+                local otherHRP = plr.Character:FindFirstChild("HumanoidRootPart")
+                if otherHRP then
+                    local dist = (otherHRP.Position - myHRP.Position).Magnitude
+                    if dist <= repelRadius then
+                        local uid = plr.UserId
+                        if not repelCooldowns[uid] or (tick() - repelCooldowns[uid] > 0.35) then
+                            repelCooldowns[uid] = tick()
+                            -- BodyVelocity push away
+                            local dir = (otherHRP.Position - myHRP.Position)
+                            if dir.Magnitude == 0 then dir = Vector3.new(math.random(),1,math.random()) end
+                            local bv = Instance.new("BodyVelocity")
+                            bv.MaxForce = Vector3.new(1e6,1e6,1e6)
+                            bv.Velocity = dir.Unit * repelForce + Vector3.new(0, 40, 0) -- add upward
+                            bv.Parent = otherHRP
+                            Debris:AddItem(bv, 0.2)
+                        end
+                    end
+                end
+            end
+        end
+    end
+end)
+
+-- small UI tweak: allow editing radius/force by middle-clicking Repel button (simple prompt)
+RepelBtn.MouseButton2Click:Connect(function()
+    -- prompt via simple sequential input using InputBegan (quick & dirty)
+    local oldText = RepelBtn.Text
+    RepelBtn.Text = "Enter radius (type number then press Enter)"
+    local connection
+    connection = UserInputService.InputBegan:Connect(function(input, gpe)
+        if input.UserInputType == Enum.UserInputType.Keyboard and not gpe then
+            if input.KeyCode == Enum.KeyCode.Return then
+                -- read text from clipboard as quick input (user would paste). fallback: keep old.
+                local clip = pcall(function() return UserInputService:GetFocusedTextBox() end)
+                RepelBtn.Text = oldText
+                connection:Disconnect()
+            end
         end
     end)
 end)
 
-SpectatorButton.MouseButton1Click:Connect(function()
-    buttonClickAnimation(SpectatorButton)
-    -- Spectator Mode Code
-    local player = game.Players.LocalPlayer
-    local camera = workspace.CurrentCamera
-    
-    camera.CameraSubject = nil
-    camera.CameraType = Enum.CameraType.Scriptable
-    camera.CFrame = CFrame.new(player.Character.HumanoidRootPart.Position + Vector3.new(0, 10, 0))
+-- Safety: restore sizes and stats on player leaving or when UI is destroyed
+Players.PlayerRemoving:Connect(function(plr)
+    local id = plr.UserId
+    if originalStats[id] then originalStats[id] = nil end
+    if originalSizes[id] then originalSizes[id] = nil end
 end)
 
-AdminDetectButton.MouseButton1Click:Connect(function()
-    buttonClickAnimation(AdminDetectButton)
-    -- Admin Detection Code
-    local Players = game:GetService("Players")
-    local player = Players.LocalPlayer
-    local adminKeywords = {"admin", "owner", "dev", "developer"}
-
-    local function isAdmin(player)
-        local title = player:FindFirstChild("Title")
-        if title then
-            for _, keyword in ipairs(adminKeywords) do
-                if title.Value:lower():find(keyword) then
-                    return true
+screen:BindToClose(function()
+    -- try restore defaults
+    for _,plr in ipairs(Players:GetPlayers()) do
+        if plr ~= player and plr.Character then
+            local c, hrp, hum = getCharParts(plr)
+            if hum and originalStats[plr.UserId] then
+                pcall(function()
+                    hum.WalkSpeed = originalStats[plr.UserId].walk or hum.WalkSpeed
+                    hum.JumpPower = originalStats[plr.UserId].jump or hum.JumpPower
+                end)
+            end
+            -- attempt restore part sizes
+            if originalSizes[plr.UserId] then
+                for part, s in pairs(originalSizes[plr.UserId]) do
+                    if part and part.Parent then
+                        pcall(function() part.Size = s end)
+                    end
                 end
             end
         end
-        return false
     end
+    -- remove blur
+    if blur and blur.Parent then blur:Destroy() end
+end)
 
-    -- Show Admin Info
-    for _, plr in pairs(Players:GetPlayers()) do
-        if isAdmin(plr) then
-            print(plr.Name .. " is an admin!")
+-- small visual: rotate gradient slowly and breathing scale
+task.spawn(function()
+    while true do
+        for r = 0, 360, 2 do
+            grad.Rotation = r
+            wait(0.02)
         end
     end
 end)
 
--- Menutup GUI
-CloseButton.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
+task.spawn(function()
+    while true do
+        TweenService:Create(Main, TweenInfo.new(2.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.new(0,430,0,330)}):Play()
+        wait(2.8)
+        TweenService:Create(Main, TweenInfo.new(2.8, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut), {Size = UDim2.new(0,420,0,320)}):Play()
+        wait(2.8)
+    end
 end)
 
+-- small UX: display current settings in bottom label
+local function updateStatusLine()
+    labelSmall.Text = ("Repel radius: %d | force: %d | Size x%.2f | Gravity: %s"):format(repelRadius, repelForce, sizeScale, gravityMode)
+end
+updateStatusLine()
+
+-- Right-click handlers for quick tweak: Ctrl+Click on SizeBtn to reset sizes to 1.0
+SizeBtn.MouseButton2Click:Connect(function()
+    sizeScale = 1.0
+    SizeBtn.Text = "Size x1.00"
+    -- restore sizes
+    for id,parts in pairs(originalSizes) do
+        for part, orig in pairs(parts) do
+            if part and part.Parent then
+                pcall(function() part.Size = orig end)
+            end
+        end
+    end
+    originalSizes = {}
+    updateStatusLine()
+end)
+
+-- small keyboard shortcuts (optional)
+UserInputService.InputBegan:Connect(function(input, gpe)
+    if gpe then return end
+    if input.KeyCode == Enum.KeyCode.K then -- quick toggle repel
+        RepelBtn.MouseButton1Click:Fire()
+    elseif input.KeyCode == Enum.KeyCode.L then -- toggle freeze
+        FreezeBtn.MouseButton1Click:Fire()
+    end
+end)
+
+-- Done. Enjoy — again, use responsibly and in private/testing environments only.
