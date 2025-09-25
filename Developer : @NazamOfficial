@@ -10,12 +10,14 @@ ScreenGui.Name = "CheckpointRecorder"
 ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
--- Frame utama
+-- Frame utama (16:9 proporsional, tidak terlalu besar)
 local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 400, 0, 300)
-Frame.Position = UDim2.new(0.5, -200, 0.1, 0)
+Frame.Size = UDim2.new(0, 640, 0, 360) -- 16:9
+Frame.Position = UDim2.new(0.5, -320, 0.1, 0)
 Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
 Frame.BorderSizePixel = 2
+Frame.Active = true
+Frame.Draggable = true
 Frame.Parent = ScreenGui
 
 -- Tombol Rekam CP
@@ -31,11 +33,12 @@ RecordButton.Parent = Frame
 
 -- Scroll untuk menampilkan codingan checkpoint
 local ScrollFrame = Instance.new("ScrollingFrame")
-ScrollFrame.Size = UDim2.new(0, 380, 0, 230)
+ScrollFrame.Size = UDim2.new(0, 620, 0, 300) -- cukup lebar agar teks terlihat
 ScrollFrame.Position = UDim2.new(0, 10, 0, 60)
 ScrollFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
 ScrollFrame.BorderSizePixel = 1
 ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+ScrollFrame.ScrollBarThickness = 10
 ScrollFrame.Parent = Frame
 
 -- UIListLayout untuk scroll
@@ -60,7 +63,8 @@ local function recordCheckpoint()
     lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
     lbl.Font = Enum.Font.SourceSans
     lbl.TextSize = 16
-    lbl.Text = 'CEKPOINT KE '..checkpointIndex..' = Vector3.new('..pos.X..','..pos.Y..','..pos.Z..')'
+    lbl.TextXAlignment = Enum.TextXAlignment.Left
+    lbl.Text = 'CEKPOINT KE '..checkpointIndex..' = Vector3.new('..string.format("%.2f", pos.X)..','..string.format("%.2f", pos.Y)..','..string.format("%.2f", pos.Z)..')'
     lbl.Parent = ScrollFrame
 
     -- Update canvas size supaya scroll bisa digulir
