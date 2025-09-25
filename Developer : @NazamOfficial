@@ -1,160 +1,158 @@
--- SERVICES
+-- Services
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
 local PathfindingService = game:GetService("PathfindingService")
 local LocalPlayer = Players.LocalPlayer
 
--- CHECKPOINTS
-local checkpoints = {
-    Vector3.new(-412.20,252.31,762.63),
-    Vector3.new(-363.79,391.31,530.98),
-    Vector3.new(268.42,433.00,525.19),
-    Vector3.new(322.83,493.31,356.48),
-    Vector3.new(231.93,317.31,-144.80),
-}
-
--- VARIABLES
+-- Character & Humanoid
 local chr = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
 local hum = chr:WaitForChild("Humanoid")
 local hrp = chr:WaitForChild("HumanoidRootPart")
-local autoWalkActive = false
-local currentCheckpoint = 1
-local stopWalk = false
 
--- GUI CREATION
-local mainGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
-mainGui.Name = "AutoWalkGUI"
-mainGui.ResetOnSpawn = false
+-- GUI
+local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
+ScreenGui.Name = "AutoWalkGUI"
+ScreenGui.ResetOnSpawn = false
 
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(0, 350, 0, 180)
-frame.Position = UDim2.new(0.3,0,0.3,0)
-frame.BackgroundColor3 = Color3.fromRGB(35,35,35)
-frame.BorderSizePixel = 0
-frame.Parent = mainGui
-frame.Active = true
-frame.Draggable = true
+local mainFrame = Instance.new("Frame")
+mainFrame.Parent = ScreenGui
+mainFrame.Size = UDim2.new(0, 350, 0, 200)
+mainFrame.Position = UDim2.new(0.3,0,0.3,0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+mainFrame.BorderSizePixel = 0
+mainFrame.Active = true
+mainFrame.Draggable = true
+mainFrame.ClipsDescendants = true
 local corner = Instance.new("UICorner")
 corner.CornerRadius = UDim.new(0,12)
-corner.Parent = frame
+corner.Parent = mainFrame
 
--- Title
 local title = Instance.new("TextLabel")
-title.Parent = frame
-title.Size = UDim2.new(1,0,0,30)
+title.Parent = mainFrame
+title.Text = "Auto Walk | 3D Theme"
+title.Size = UDim2.new(1,0,0,40)
 title.Position = UDim2.new(0,0,0,0)
 title.BackgroundTransparency = 1
 title.Font = Enum.Font.SourceSansBold
-title.Text = "Auto Walk"
 title.TextSize = 22
 title.TextColor3 = Color3.fromRGB(255,255,255)
-title.TextXAlignment = Enum.TextXAlignment.Left
-title.Position = UDim2.new(0,10,0,0)
-
--- Start Walk Button
-local startBtn = Instance.new("TextButton")
-startBtn.Parent = frame
-startBtn.Size = UDim2.new(0,150,0,50)
-startBtn.Position = UDim2.new(0,10,0,50)
-startBtn.BackgroundColor3 = Color3.fromRGB(50,50,50)
-startBtn.TextColor3 = Color3.fromRGB(255,255,255)
-startBtn.Text = "Start Walk"
-startBtn.Font = Enum.Font.SourceSansBold
-startBtn.TextSize = 18
-local btnCorner = Instance.new("UICorner")
-btnCorner.CornerRadius = UDim.new(0,10)
-btnCorner.Parent = startBtn
 
 -- Close Button
 local closeBtn = Instance.new("TextButton")
-closeBtn.Parent = frame
-closeBtn.Size = UDim2.new(0,30,0,30)
+closeBtn.Parent = mainFrame
+closeBtn.Size = UDim2.new(0, 30, 0, 30)
 closeBtn.Position = UDim2.new(1,-35,0,5)
-closeBtn.BackgroundColor3 = Color3.fromRGB(255,50,50)
-closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
 closeBtn.Text = "X"
 closeBtn.Font = Enum.Font.SourceSansBold
 closeBtn.TextSize = 20
+closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
+closeBtn.BackgroundColor3 = Color3.fromRGB(180,0,0)
 local closeCorner = Instance.new("UICorner")
 closeCorner.CornerRadius = UDim.new(0,8)
 closeCorner.Parent = closeBtn
 
--- FK Button (bentuk bulat panjang)
+-- FK Object (tombol bulat panjang)
 local fkBtn = Instance.new("TextButton")
-fkBtn.Parent = mainGui
+fkBtn.Parent = ScreenGui
 fkBtn.Size = UDim2.new(0,45,0,45)
 fkBtn.Position = UDim2.new(0.5,-22,0,20)
-fkBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
-fkBtn.TextColor3 = Color3.fromRGB(255,255,255)
 fkBtn.Text = "FK"
 fkBtn.Font = Enum.Font.SourceSansBold
-fkBtn.TextScaled = true
+fkBtn.TextSize = 18
+fkBtn.TextColor3 = Color3.fromRGB(255,255,255)
+fkBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
 fkBtn.Visible = false
 fkBtn.Active = true
 fkBtn.Draggable = true
 local fkCorner = Instance.new("UICorner")
-fkCorner.CornerRadius = UDim.new(0.5,0)
+fkCorner.CornerRadius = UDim.new(1,0)
 fkCorner.Parent = fkBtn
 
--- CLOSE BUTTON LOGIC
 closeBtn.MouseButton1Click:Connect(function()
-    frame.Visible = false
-    fkBtn.Visible = true
+	mainFrame.Visible = false
+	fkBtn.Visible = true
 end)
-
 fkBtn.MouseButton1Click:Connect(function()
-    frame.Visible = true
-    fkBtn.Visible = false
+	mainFrame.Visible = true
+	fkBtn.Visible = false
 end)
 
--- AUTO WALK LOGIC
-local function moveToCheckpoint(targetPos)
-    local path = PathfindingService:CreatePath({
-        AgentRadius = 2,
-        AgentHeight = 5,
-        AgentCanJump = true,
-        AgentJumpHeight = 7,
-        AgentMaxSlope = 45,
-    })
-    path:ComputeAsync(hrp.Position, targetPos)
-    local waypoints = path:GetWaypoints()
-    for _, wp in ipairs(waypoints) do
-        if stopWalk then break end
-        if wp.Action == Enum.PathWaypointAction.Jump then
-            hum:ChangeState(Enum.HumanoidStateType.Jumping)
-        end
-        hum:MoveTo(wp.Position)
-        hum.MoveToFinished:Wait()
-    end
+-- Start Walk Button
+local startBtn = Instance.new("TextButton")
+startBtn.Parent = mainFrame
+startBtn.Size = UDim2.new(0,150,0,50)
+startBtn.Position = UDim2.new(0.5,-75,0.7,0)
+startBtn.Text = "Start Walk"
+startBtn.Font = Enum.Font.SourceSansBold
+startBtn.TextSize = 20
+startBtn.TextColor3 = Color3.fromRGB(255,255,255)
+startBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+local startCorner = Instance.new("UICorner")
+startCorner.CornerRadius = UDim.new(0,12)
+startCorner.Parent = startBtn
+
+-- Cekpoint List
+local checkpoints = {
+	Vector3.new(-412.20,252.31,762.63),
+	Vector3.new(-363.79,391.31,530.98),
+	Vector3.new(268.42,433.00,525.19),
+	Vector3.new(322.83,493.31,356.48),
+	Vector3.new(231.93,317.31,-144.80),
+}
+
+-- Auto Walk Logic
+local walkActive = false
+local currentCheckpoint = 1
+local stopWalk = false
+
+local function walkToNextCheckpoint()
+	while walkActive and currentCheckpoint <= #checkpoints do
+		local targetPos = checkpoints[currentCheckpoint]
+		local path = PathfindingService:CreatePath({
+			AgentRadius = 2,
+			AgentHeight = 5,
+			AgentCanJump = true,
+			AgentJumpHeight = 7,
+			AgentMaxSlope = 45,
+		})
+		path:ComputeAsync(hrp.Position, targetPos)
+		local waypoints = path:GetWaypoints()
+
+		for _, wp in ipairs(waypoints) do
+			if not walkActive or stopWalk then return end
+
+			-- Humanoid jalan
+			hum:MoveTo(wp.Position)
+			hum:ChangeState(Enum.HumanoidStateType.Running)
+
+			if wp.Action == Enum.PathWaypointAction.Jump then
+				hum:ChangeState(Enum.HumanoidStateType.Jumping)
+			end
+
+			local reached = false
+			local connection
+			connection = hum.MoveToFinished:Connect(function(success)
+				reached = true
+			end)
+			while not reached and walkActive and not stopWalk do
+				RunService.Heartbeat:Wait()
+			end
+			connection:Disconnect()
+		end
+		currentCheckpoint = currentCheckpoint + 1
+	end
 end
 
-local function startAutoWalk()
-    stopWalk = false
-    autoWalkActive = true
-    spawn(function()
-        while autoWalkActive and currentCheckpoint <= #checkpoints do
-            moveToCheckpoint(checkpoints[currentCheckpoint])
-            if stopWalk then break end
-            currentCheckpoint = currentCheckpoint + 1
-            wait(0.2)
-        end
-        autoWalkActive = false
-    end)
-end
-
-local function pauseAutoWalk()
-    stopWalk = true
-    autoWalkActive = false
-end
-
--- START WALK BUTTON TOGGLE
+-- Start / Pause Toggle
 startBtn.MouseButton1Click:Connect(function()
-    if autoWalkActive then
-        pauseAutoWalk()
-        startBtn.Text = "Resume Walk"
-    else
-        startAutoWalk()
-        startBtn.Text = "Pause Walk"
-    end
+	walkActive = not walkActive
+	stopWalk = false
+	if walkActive then
+		startBtn.Text = "Pause Walk"
+		coroutine.wrap(walkToNextCheckpoint)()
+	else
+		startBtn.Text = "Start Walk"
+		stopWalk = true
+	end
 end)
