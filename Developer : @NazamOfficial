@@ -1,75 +1,137 @@
--- SERVICES
+-- Services
 local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local PathfindingService = game:GetService("PathfindingService")
 local LocalPlayer = Players.LocalPlayer
-local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
--- GUI utama
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "CheckpointRecorder"
-ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
-ScreenGui.ResetOnSpawn = false
+-- Checkpoints
+local Checkpoints = {
+    Vector3.new(-412.20,252.31,762.63),
+    Vector3.new(-363.79,391.31,530.98),
+    Vector3.new(268.42,433.00,525.19),
+    Vector3.new(322.83,493.31,356.48),
+    Vector3.new(231.93,317.31,-144.80)
+}
 
--- Frame utama (16:9 proporsional, tidak terlalu besar)
-local Frame = Instance.new("Frame")
-Frame.Size = UDim2.new(0, 640, 0, 360) -- 16:9
-Frame.Position = UDim2.new(0.5, -320, 0.1, 0)
-Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-Frame.BorderSizePixel = 2
-Frame.Active = true
-Frame.Draggable = true
-Frame.Parent = ScreenGui
+-- GUI
+local main = Instance.new("ScreenGui")
+main.Name = "AutoWalkGUI"
+main.Parent = LocalPlayer:WaitForChild("PlayerGui")
+main.ResetOnSpawn = false
+main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
--- Tombol Rekam CP
-local RecordButton = Instance.new("TextButton")
-RecordButton.Size = UDim2.new(0, 150, 0, 40)
-RecordButton.Position = UDim2.new(0.5, -75, 0, 10)
-RecordButton.BackgroundColor3 = Color3.fromRGB(0, 170, 255)
-RecordButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-RecordButton.Font = Enum.Font.SourceSansBold
-RecordButton.TextSize = 18
-RecordButton.Text = "Rekam CP"
-RecordButton.Parent = Frame
+-- Frame utama
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 350, 0, 180)
+frame.Position = UDim2.new(0.3,0,0.3,0)
+frame.BackgroundColor3 = Color3.fromRGB(40,40,40)
+frame.BorderSizePixel = 0
+frame.Parent = main
+frame.Active = true
+frame.Draggable = true
 
--- Scroll untuk menampilkan codingan checkpoint
-local ScrollFrame = Instance.new("ScrollingFrame")
-ScrollFrame.Size = UDim2.new(0, 620, 0, 300) -- cukup lebar agar teks terlihat
-ScrollFrame.Position = UDim2.new(0, 10, 0, 60)
-ScrollFrame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-ScrollFrame.BorderSizePixel = 1
-ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
-ScrollFrame.ScrollBarThickness = 10
-ScrollFrame.Parent = Frame
+local uicorner = Instance.new("UICorner")
+uicorner.CornerRadius = UDim.new(0,15)
+uicorner.Parent = frame
 
--- UIListLayout untuk scroll
-local UIListLayout = Instance.new("UIListLayout")
-UIListLayout.Parent = ScrollFrame
-UIListLayout.Padding = UDim.new(0, 5)
+-- Title
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, -40, 0, 30)
+title.Position = UDim2.new(0, 10, 0, 10)
+title.BackgroundTransparency = 1
+title.Text = "Auto Walk System"
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 20
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = frame
 
--- Tabel checkpoint
-local checkpoints = {}
-local checkpointIndex = 0
+-- Close Button
+local closeBtn = Instance.new("TextButton")
+closeBtn.Size = UDim2.new(0,30,0,30)
+closeBtn.Position = UDim2.new(1, -35, 0, 5)
+closeBtn.Text = "X"
+closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
+closeBtn.Font = Enum.Font.SourceSansBold
+closeBtn.TextSize = 20
+closeBtn.BackgroundColor3 = Color3.fromRGB(200,0,0)
+closeBtn.Parent = frame
 
--- Fungsi rekam checkpoint
-local function recordCheckpoint()
-    checkpointIndex = checkpointIndex + 1
-    local pos = HumanoidRootPart.Position
-    table.insert(checkpoints, pos)
-    
-    -- Buat label baru untuk codingan
-    local lbl = Instance.new("TextLabel")
-    lbl.Size = UDim2.new(1, -10, 0, 25)
-    lbl.BackgroundTransparency = 1
-    lbl.TextColor3 = Color3.fromRGB(255, 255, 255)
-    lbl.Font = Enum.Font.SourceSans
-    lbl.TextSize = 16
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-    lbl.Text = 'CEKPOINT KE '..checkpointIndex..' = Vector3.new('..string.format("%.2f", pos.X)..','..string.format("%.2f", pos.Y)..','..string.format("%.2f", pos.Z)..')'
-    lbl.Parent = ScrollFrame
+-- Start Walk Toggle
+local startBtn = Instance.new("TextButton")
+startBtn.Size = UDim2.new(0,200,0,50)
+startBtn.Position = UDim2.new(0.5, -100, 0, 80)
+startBtn.Text = "Start Walk"
+startBtn.Font = Enum.Font.SourceSansBold
+startBtn.TextSize = 20
+startBtn.TextColor3 = Color3.fromRGB(255,255,255)
+startBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
+startBtn.Parent = frame
 
-    -- Update canvas size supaya scroll bisa digulir
-    ScrollFrame.CanvasSize = UDim2.new(0, 0, 0, UIListLayout.AbsoluteContentSize.Y)
-end
+local uicornerBtn = Instance.new("UICorner")
+uicornerBtn.CornerRadius = UDim.new(0,12)
+uicornerBtn.Parent = startBtn
 
--- Tombol klik
-RecordButton.MouseButton1Click:Connect(recordCheckpoint)
+-- Buat objek bulat panjang FK
+local fkBtn = Instance.new("TextButton")
+fkBtn.Size = UDim2.new(0,45,0,45)
+fkBtn.Position = UDim2.new(0.5, -22, 0, 20)
+fkBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
+fkBtn.Text = "FK"
+fkBtn.TextColor3 = Color3.fromRGB(255,255,255)
+fkBtn.Font = Enum.Font.SourceSansBold
+fkBtn.TextScaled = true
+fkBtn.Parent = main
+fkBtn.Visible = false
+fkBtn.Active = true
+fkBtn.Draggable = true
+
+local fkCorner = Instance.new("UICorner")
+fkCorner.CornerRadius = UDim.new(0.5,0)
+fkCorner.Parent = fkBtn
+
+-- Toggle Start Walk
+local walkActive = false
+local currentCheckpoint = 1
+local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
+startBtn.MouseButton1Click:Connect(function()
+    walkActive = not walkActive
+    startBtn.Text = walkActive and "Pause Walk" or "Start Walk"
+end)
+
+-- Close X
+closeBtn.MouseButton1Click:Connect(function()
+    frame.Visible = false
+    fkBtn.Visible = true
+end)
+
+-- Tampilkan GUI kembali dari FK
+fkBtn.MouseButton1Click:Connect(function()
+    frame.Visible = true
+    fkBtn.Visible = false
+end)
+
+-- Auto Walk Logic
+spawn(function()
+    while true do
+        RunService.RenderStepped:Wait()
+        if walkActive then
+            local target = Checkpoints[currentCheckpoint]
+            if target then
+                local direction = (target - humanoidRootPart.Position).Unit
+                humanoidRootPart.CFrame = humanoidRootPart.CFrame + direction * 1 -- kecepatan 1 bisa diubah
+
+                -- cek jarak ke checkpoint
+                if (humanoidRootPart.Position - target).Magnitude < 3 then
+                    currentCheckpoint = currentCheckpoint + 1
+                    if currentCheckpoint > #Checkpoints then
+                        walkActive = false
+                        startBtn.Text = "Start Walk"
+                    end
+                end
+            end
+        end
+    end
+end)
