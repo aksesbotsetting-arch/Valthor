@@ -1,158 +1,201 @@
 -- Services
 local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local PathfindingService = game:GetService("PathfindingService")
 local LocalPlayer = Players.LocalPlayer
+local TweenService = game:GetService("TweenService")
+local StarterGui = game:GetService("StarterGui")
+local RunService = game:GetService("RunService")
 
--- Character & Humanoid
-local chr = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
-local hum = chr:WaitForChild("Humanoid")
-local hrp = chr:WaitForChild("HumanoidRootPart")
+-- Blur Effect
+local blur = Instance.new("BlurEffect")
+blur.Size = 0
+blur.Parent = game.Lighting
 
--- GUI
-local ScreenGui = Instance.new("ScreenGui", LocalPlayer:WaitForChild("PlayerGui"))
-ScreenGui.Name = "AutoWalkGUI"
+-- ScreenGui
+local ScreenGui = Instance.new("ScreenGui")
+ScreenGui.Name = "WVOX_GUI"
+ScreenGui.Parent = LocalPlayer:WaitForChild("PlayerGui")
 ScreenGui.ResetOnSpawn = false
 
+-- Main Frame 16:9
 local mainFrame = Instance.new("Frame")
-mainFrame.Parent = ScreenGui
-mainFrame.Size = UDim2.new(0, 350, 0, 200)
-mainFrame.Position = UDim2.new(0.3,0,0.3,0)
-mainFrame.BackgroundColor3 = Color3.fromRGB(30,30,30)
-mainFrame.BorderSizePixel = 0
+mainFrame.Size = UDim2.new(0, 960, 0, 540) -- 16:9, bisa diubah
+mainFrame.Position = UDim2.new(0.5,-480,0.3,0)
+mainFrame.BackgroundColor3 = Color3.fromRGB(0,0,0)
+mainFrame.BackgroundTransparency = 0.3
 mainFrame.Active = true
 mainFrame.Draggable = true
-mainFrame.ClipsDescendants = true
-local corner = Instance.new("UICorner")
-corner.CornerRadius = UDim.new(0,12)
-corner.Parent = mainFrame
+mainFrame.Parent = ScreenGui
 
-local title = Instance.new("TextLabel")
-title.Parent = mainFrame
-title.Text = "Auto Walk | 3D Theme"
-title.Size = UDim2.new(1,0,0,40)
-title.Position = UDim2.new(0,0,0,0)
-title.BackgroundTransparency = 1
-title.Font = Enum.Font.SourceSansBold
-title.TextSize = 22
-title.TextColor3 = Color3.fromRGB(255,255,255)
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0,15)
+mainCorner.Parent = mainFrame
+
+-- Shadow (simulasi)
+local shadow = Instance.new("UIStroke")
+shadow.Thickness = 2
+shadow.Color = Color3.fromRGB(50,50,50)
+shadow.Parent = mainFrame
+
+-- Top Bar
+local topBar = Instance.new("Frame")
+topBar.Parent = mainFrame
+topBar.Size = UDim2.new(1,0,0,40)
+topBar.Position = UDim2.new(0,0,0,0)
+topBar.BackgroundColor3 = Color3.fromRGB(80,80,80)
+topBar.BackgroundTransparency = 0.4
+
+local topText = Instance.new("TextLabel")
+topText.Parent = topBar
+topText.Size = UDim2.new(1,0,1,0)
+topText.BackgroundTransparency = 1
+topText.Text = "WVOX"
+topText.TextColor3 = Color3.fromRGB(255,255,255)
+topText.Font = Enum.Font.SourceSansBold
+topText.TextSize = 22
+
+-- Left Buttons (8)
+local leftButtons = {}
+local leftFrame = Instance.new("Frame")
+leftFrame.Parent = mainFrame
+leftFrame.Size = UDim2.new(0.5,0,1,0)
+leftFrame.Position = UDim2.new(0,0,0,0)
+leftFrame.BackgroundTransparency = 1
+
+for i = 1,8 do
+    local btn = Instance.new("TextButton")
+    btn.Parent = leftFrame
+    btn.Size = UDim2.new(0,150,0,40)
+    btn.Position = UDim2.new(0,10,0,50 + (i-1)*50)
+    btn.BackgroundColor3 = Color3.fromRGB(100,100,100)
+    btn.BackgroundTransparency = 0.4
+    btn.Text = "FITUR "..i
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 18
+    btn.TextColor3 = Color3.fromRGB(255,255,255)
+    local corner = Instance.new("UICorner")
+    corner.CornerRadius = UDim.new(0,10)
+    corner.Parent = btn
+    leftButtons[i] = btn
+end
+
+-- Right Frame (Dynamic)
+local rightFrame = Instance.new("Frame")
+rightFrame.Parent = mainFrame
+rightFrame.Size = UDim2.new(0.5,0,1,0)
+rightFrame.Position = UDim2.new(0.5,0,0,0)
+rightFrame.BackgroundTransparency = 1
+
+-- Function to populate right frame
+local function populateRight(buttonIndex)
+    -- Clear old
+    rightFrame:ClearAllChildren()
+    for i=1,5 do
+        local btn = Instance.new("TextButton")
+        btn.Parent = rightFrame
+        btn.Size = UDim2.new(0,150,0,40)
+        btn.Position = UDim2.new(0,10,0,50 + (i-1)*50)
+        btn.BackgroundColor3 = Color3.fromRGB(100,100,100)
+        btn.BackgroundTransparency = 0.4
+        btn.Text = "Button "..i.." for FITUR "..buttonIndex
+        btn.Font = Enum.Font.SourceSansBold
+        btn.TextSize = 18
+        btn.TextColor3 = Color3.fromRGB(255,255,255)
+        local corner = Instance.new("UICorner")
+        corner.CornerRadius = UDim.new(0,10)
+        corner.Parent = btn
+    end
+end
+
+-- Connect left buttons
+for i,btn in pairs(leftButtons) do
+    btn.MouseButton1Click:Connect(function()
+        populateRight(i)
+        -- Simple animation
+        local tweenInfo = TweenInfo.new(0.3,Enum.EasingStyle.Sine,Enum.EasingDirection.Out)
+        local tween = TweenService:Create(rightFrame,tweenInfo,{BackgroundTransparency = 0.2})
+        tween:Play()
+    end)
+end
 
 -- Close Button
 local closeBtn = Instance.new("TextButton")
 closeBtn.Parent = mainFrame
-closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(1,-35,0,5)
+closeBtn.Size = UDim2.new(0,35,0,35)
+closeBtn.Position = UDim2.new(1,-40,0,5)
 closeBtn.Text = "X"
 closeBtn.Font = Enum.Font.SourceSansBold
 closeBtn.TextSize = 20
 closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
-closeBtn.BackgroundColor3 = Color3.fromRGB(180,0,0)
+closeBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
 local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0,8)
+closeCorner.CornerRadius = UDim.new(1,0)
 closeCorner.Parent = closeBtn
 
--- FK Object (tombol bulat panjang)
+-- FK Button (after close)
 local fkBtn = Instance.new("TextButton")
 fkBtn.Parent = ScreenGui
 fkBtn.Size = UDim2.new(0,45,0,45)
 fkBtn.Position = UDim2.new(0.5,-22,0,20)
-fkBtn.Text = "FK"
+fkBtn.Text = "Tes"
 fkBtn.Font = Enum.Font.SourceSansBold
 fkBtn.TextSize = 18
 fkBtn.TextColor3 = Color3.fromRGB(255,255,255)
 fkBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
 fkBtn.Visible = false
-fkBtn.Active = true
 fkBtn.Draggable = true
 local fkCorner = Instance.new("UICorner")
 fkCorner.CornerRadius = UDim.new(1,0)
 fkCorner.Parent = fkBtn
 
+-- Play Button (Music toggle)
+local playBtn = Instance.new("TextButton")
+playBtn.Parent = mainFrame
+playBtn.Size = UDim2.new(0,35,0,35)
+playBtn.Position = UDim2.new(1,-80,0,5)
+playBtn.Text = "▶"
+playBtn.Font = Enum.Font.SourceSansBold
+playBtn.TextSize = 20
+playBtn.TextColor3 = Color3.fromRGB(255,255,255)
+playBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
+local playCorner = Instance.new("UICorner")
+playCorner.CornerRadius = UDim.new(1,0)
+playCorner.Parent = playBtn
+
+local sound = Instance.new("Sound")
+sound.SoundId = "rbxassetid://184352858" -- contoh musik, bisa diganti
+sound.Parent = mainFrame
+local playing = false
+playBtn.MouseButton1Click:Connect(function()
+    if playing then
+        sound:Stop()
+        playing = false
+    else
+        sound:Play()
+        playing = true
+    end
+end)
+
+-- Close logic
 closeBtn.MouseButton1Click:Connect(function()
-	mainFrame.Visible = false
-	fkBtn.Visible = true
+    mainFrame.Visible = false
+    fkBtn.Visible = true
 end)
 fkBtn.MouseButton1Click:Connect(function()
-	mainFrame.Visible = true
-	fkBtn.Visible = false
+    mainFrame.Visible = true
+    fkBtn.Visible = false
 end)
 
--- Start Walk Button
-local startBtn = Instance.new("TextButton")
-startBtn.Parent = mainFrame
-startBtn.Size = UDim2.new(0,150,0,50)
-startBtn.Position = UDim2.new(0.5,-75,0.7,0)
-startBtn.Text = "Start Walk"
-startBtn.Font = Enum.Font.SourceSansBold
-startBtn.TextSize = 20
-startBtn.TextColor3 = Color3.fromRGB(255,255,255)
-startBtn.BackgroundColor3 = Color3.fromRGB(60,60,60)
-local startCorner = Instance.new("UICorner")
-startCorner.CornerRadius = UDim.new(0,12)
-startCorner.Parent = startBtn
-
--- Cekpoint List
-local checkpoints = {
-	Vector3.new(-412.20,252.31,762.63),
-	Vector3.new(-363.79,391.31,530.98),
-	Vector3.new(268.42,433.00,525.19),
-	Vector3.new(322.83,493.31,356.48),
-	Vector3.new(231.93,317.31,-144.80),
-}
-
--- Auto Walk Logic
-local walkActive = false
-local currentCheckpoint = 1
-local stopWalk = false
-
-local function walkToNextCheckpoint()
-	while walkActive and currentCheckpoint <= #checkpoints do
-		local targetPos = checkpoints[currentCheckpoint]
-		local path = PathfindingService:CreatePath({
-			AgentRadius = 2,
-			AgentHeight = 5,
-			AgentCanJump = true,
-			AgentJumpHeight = 7,
-			AgentMaxSlope = 45,
-		})
-		path:ComputeAsync(hrp.Position, targetPos)
-		local waypoints = path:GetWaypoints()
-
-		for _, wp in ipairs(waypoints) do
-			if not walkActive or stopWalk then return end
-
-			-- Humanoid jalan
-			hum:MoveTo(wp.Position)
-			hum:ChangeState(Enum.HumanoidStateType.Running)
-
-			if wp.Action == Enum.PathWaypointAction.Jump then
-				hum:ChangeState(Enum.HumanoidStateType.Jumping)
-			end
-
-			local reached = false
-			local connection
-			connection = hum.MoveToFinished:Connect(function(success)
-				reached = true
-			end)
-			while not reached and walkActive and not stopWalk do
-				RunService.Heartbeat:Wait()
-			end
-			connection:Disconnect()
-		end
-		currentCheckpoint = currentCheckpoint + 1
-	end
-end
-
--- Start / Pause Toggle
-startBtn.MouseButton1Click:Connect(function()
-	walkActive = not walkActive
-	stopWalk = false
-	if walkActive then
-		startBtn.Text = "Pause Walk"
-		coroutine.wrap(walkToNextCheckpoint)()
-	else
-		startBtn.Text = "Start Walk"
-		stopWalk = true
-	end
-end)
+-- Loading Animation
+local loading = Instance.new("Frame")
+loading.Parent = ScreenGui
+loading.Size = UDim2.new(0,300,0,50)
+loading.Position = UDim2.new(0.5,-150,0.5,-25)
+loading.BackgroundColor3 = Color3.fromRGB(60,60,60)
+local loadCorner = Instance.new("UICorner")
+loadCorner.CornerRadius = UDim.new(0,15)
+loadCorner.Parent = loading
+local loadText = Instance.new("TextLabel")
+loadText.Parent = loading
+loadText.Size = UDim2.new(1,0,1,0)
+loadText.BackgroundTransparency = 1
+loadText.Text = "Loading..."
