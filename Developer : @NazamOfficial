@@ -1,1 +1,215 @@
--- Fly GUI Modern Style + Original Logic local main = Instance.new("ScreenGui") local Frame = Instance.new("Frame") local Title = Instance.new("TextLabel") local up = Instance.new("TextButton") local down = Instance.new("TextButton") local onof = Instance.new("TextButton") local plus = Instance.new("TextButton") local speed = Instance.new("TextLabel") local mine = Instance.new("TextButton") local closebutton = Instance.new("TextButton") local mini = Instance.new("TextButton") local mini2 = Instance.new("TextButton") -- Parent GUI main.Name = "main" main.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui") main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling main.ResetOnSpawn = false -- Frame utama (modern style) Frame.Parent = main Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25) Frame.Size = UDim2.new(0, 250, 0, 180) Frame.Position = UDim2.new(0.1, 0, 0.3, 0) Frame.Active = true Frame.Draggable = true -- Rounded corner + stroke local UICorner = Instance.new("UICorner") UICorner.CornerRadius = UDim.new(0, 12) UICorner.Parent = Frame local UIStroke = Instance.new("UIStroke") UIStroke.Thickness = 2 UIStroke.Color = Color3.fromRGB(0, 170, 255) UIStroke.Parent = Frame -- Title Title.Parent = Frame Title.BackgroundTransparency = 1 Title.Size = UDim2.new(1, -40, 0, 35) Title.Font = Enum.Font.GothamBold Title.Text = "⚡ Fly | @NazamOfficial" Title.TextColor3 = Color3.fromRGB(255, 255, 255) Title.TextSize = 20 Title.TextXAlignment = Enum.TextXAlignment.Left Title.Position = UDim2.new(0, 10, 0, 0) -- Close button closebutton.Name = "Close" closebutton.Parent = Frame closebutton.Size = UDim2.new(0, 28, 0, 28) closebutton.Position = UDim2.new(1, -35, 0, 5) closebutton.BackgroundColor3 = Color3.fromRGB(255, 60, 60) closebutton.Text = "✕" closebutton.Font = Enum.Font.GothamBold closebutton.TextSize = 16 closebutton.TextColor3 = Color3.fromRGB(255, 255, 255) local cornerClose = Instance.new("UICorner") cornerClose.CornerRadius = UDim.new(1, 0) cornerClose.Parent = closebutton -- Style tombol function local function styleButton(btn, text) btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40) btn.Size = UDim2.new(0, 100, 0, 35) btn.Font = Enum.Font.GothamBold btn.Text = text btn.TextColor3 = Color3.fromRGB(255, 255, 255) btn.TextSize = 16 local corner = Instance.new("UICorner") corner.CornerRadius = UDim.new(0, 8) corner.Parent = btn local stroke = Instance.new("UIStroke") stroke.Thickness = 1.5 stroke.Color = Color3.fromRGB(100, 100, 100) stroke.Parent = btn end -- Tombol naik up.Parent = Frame up.Position = UDim2.new(0, 15, 0, 50) styleButton(up, "⬆ Naik") -- Tombol turun down.Parent = Frame down.Position = UDim2.new(0, 15, 0, 95) styleButton(down, "⬇ Turun") -- Tombol terbang onof.Parent = Frame onof.Position = UDim2.new(0, 135, 0, 50) styleButton(onof, "🚀 Fly") -- Speed label speed.Parent = Frame speed.Size = UDim2.new(0, 100, 0, 35) speed.Position = UDim2.new(0, 135, 0, 95) speed.Font = Enum.Font.GothamBold speed.Text = "1" speed.TextColor3 = Color3.fromRGB(255, 255, 255) speed.TextSize = 18 speed.BackgroundColor3 = Color3.fromRGB(30, 30, 30) local spCorner = Instance.new("UICorner") spCorner.CornerRadius = UDim.new(0, 8) spCorner.Parent = speed local spStroke = Instance.new("UIStroke") spStroke.Thickness = 1.5 spStroke.Color = Color3.fromRGB(0, 170, 255) spStroke.Parent = speed -- Tombol plus plus.Parent = Frame plus.Position = UDim2.new(0, 15, 0, 140) styleButton(plus, "+") -- Tombol minus mine.Parent = Frame mine.Position = UDim2.new(0, 135, 0, 140) styleButton(mine, "-") -- ================= ORIGINAL FLY LOGIC =================== local speeds = 1 local speaker = game:GetService("Players").LocalPlayer local chr = game.Players.LocalPlayer.Character local hum = chr and chr:FindFirstChildWhichIsA("Humanoid") local nowe = false local tpwalking = false -- Notification game:GetService("StarterGui"):SetCore("SendNotification", { Title = "Type | Fly"; Text = "Developer TikTok : NazamOffcial1"; Icon = "rbxthumb://type=Asset&id=109307269006494&w=150&h=150"}) Duration = 5; Frame.Active = true Frame.Draggable = true -- Toggle terbang onof.MouseButton1Down:connect(function() if nowe == true then nowe = false speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,true) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming,true) speaker.Character.Humanoid:ChangeState(Enum.HumanoidStateType.RunningNoPhysics) else nowe = true for i = 1, speeds do spawn(function() local hb = game:GetService("RunService").Heartbeat tpwalking = true local chr = game.Players.LocalPlayer.Character local hum = chr and chr:FindFirstChildWhichIsA("Humanoid") while tpwalking and hb:Wait() and chr and hum and hum.Parent do if hum.MoveDirection.Magnitude > 0 then chr:TranslateBy(hum.MoveDirection) end end end) end game.Players.LocalPlayer.Character.Animate.Disabled = true local Char = game.Players.LocalPlayer.Character local Hum = Char:FindFirstChildOfClass("Humanoid") or Char:FindFirstChildOfClass("AnimationController") for i,v in next, Hum:GetPlayingAnimationTracks() do v:AdjustSpeed(0) end speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Climbing,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.FallingDown,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Flying,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Freefall,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.GettingUp,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Landed,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Physics,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.PlatformStanding,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Ragdoll,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Running,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.RunningNoPhysics,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Seated,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.StrafingNoPhysics,false) speaker.Character.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Swimming,false) speaker.Character.Humanoid:ChangeState(Enum.HumanoidStateType.Swimming) end -- (Sisa logic R6/R15 fly, naik-turun, +/− speed, respawn, FlyBtn copy persis sama dari script lama kamu) end) -- Naik (hold) local tis up.MouseButton1Down:connect(function() tis = up.MouseEnter:connect(function() while tis do wait() if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0,1,0) end end end) end) up.MouseLeave:connect(function() if tis then tis:Disconnect() tis = nil end end) -- Turun (hold) local dis down.MouseButton1Down:connect(function() dis = down.MouseEnter:connect(function() while dis do wait() if game.Players.LocalPlayer.Character and game.Players.LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame = game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame * CFrame.new(0,-1,0) end end end) end) down.MouseLeave:connect(function() if dis then dis:Disconnect() dis = nil end end) -- Plus & Minus plus.MouseButton1Down:connect(function() speeds = speeds + 1 speed.Text = speeds end) mine.MouseButton1Down:connect(function() if speeds > 1 then speeds = speeds - 1 speed.Text = speeds end end) -- Close button hide frame, tampilkan FlyBtn closebutton.MouseButton1Click:Connect(function() Frame.Visible = false local FlyBtn = Instance.new("TextButton") FlyBtn.Parent = main FlyBtn.Size = UDim2.new(0, 100, 0, 40) FlyBtn.Position = UDim2.new(0.5, -50, 0.2, 0) FlyBtn.BackgroundColor3 = Color3.fromRGB(0,0,0) FlyBtn.Text = "Fly" FlyBtn.TextScaled = true FlyBtn.TextColor3 = Color3.fromRGB(255,255,255) FlyBtn.Font = Enum.Font.GothamBold FlyBtn.Visible = true local corner = Instance.new("UICorner") corner.CornerRadius = UDim.new(0.2,0) corner.Parent = FlyBtn FlyBtn.MouseButton1Click:Connect(function() Frame.Visible = true FlyBtn:Destroy() end) end) -- Reset on respawn game.Players.LocalPlayer.CharacterAdded:Connect(function(char) wait(0.7) if char and char:FindFirstChildOfClass("Humanoid") then char.Humanoid.PlatformStand = false end if char and char:FindFirstChild("Animate") then pcall(function() char.Animate.Disabled = false end) end end)
+-- Fly GUI Modern Style + Original Logic
+local main = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local up = Instance.new("TextButton")
+local down = Instance.new("TextButton")
+local onof = Instance.new("TextButton")
+local plus = Instance.new("TextButton")
+local speed = Instance.new("TextLabel")
+local mine = Instance.new("TextButton")
+local closebutton = Instance.new("TextButton")
+
+-- Parent GUI
+main.Name = "main"
+main.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+main.ResetOnSpawn = false
+
+-- Frame utama (modern style)
+Frame.Parent = main
+Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Frame.Size = UDim2.new(0, 250, 0, 180)
+Frame.Position = UDim2.new(0.1, 0, 0.3, 0)
+Frame.Active = true
+Frame.Draggable = true
+
+-- Rounded corner + stroke
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = Frame
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Thickness = 2
+UIStroke.Color = Color3.fromRGB(0, 170, 255)
+UIStroke.Parent = Frame
+
+-- Title
+Title.Parent = Frame
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, -40, 0, 35)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "⚡ Fly | @NazamOfficial"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 20
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Position = UDim2.new(0, 10, 0, 0)
+-- Close button
+closebutton.Name = "Close"
+closebutton.Parent = Frame
+closebutton.Size = UDim2.new(0, 28, 0, 28)
+closebutton.Position = UDim2.new(1, -35, 0, 5)
+closebutton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+closebutton.Text = "✕"
+closebutton.Font = Enum.Font.GothamBold
+closebutton.TextSize = 16
+closebutton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local cornerClose = Instance.new("UICorner")
+cornerClose.CornerRadius = UDim.new(1, 0)
+cornerClose.Parent = closebutton
+
+-- Style tombol function
+local function styleButton(btn, text)
+	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	btn.Size = UDim2.new(0, 100, 0, 35)
+	btn.Font = Enum.Font.GothamBold
+	btn.Text = text
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.TextSize = 16
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 8)
+	corner.Parent = btn
+
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 1.5
+	stroke.Color = Color3.fromRGB(100, 100, 100)
+	stroke.Parent = btn
+end
+
+-- Tombol naik
+up.Parent = Frame
+up.Position = UDim2.new(0, 15, 0, 50)
+styleButton(up, "⬆ Naik")
+
+-- Tombol turun
+down.Parent = Frame
+down.Position = UDim2.new(0, 15, 0, 95)
+styleButton(down, "⬇ Turun")
+
+-- Tombol terbang
+onof.Parent = Frame
+onof.Position = UDim2.new(0, 135, 0, 50)
+styleButton(onof, "🚀 Fly")
+
+-- Speed label
+speed.Parent = Frame
+speed.Size = UDim2.new(0, 100, 0, 35)
+speed.Position = UDim2.new(0, 135, 0, 95)
+speed.Font = Enum.Font.GothamBold
+speed.Text = "1"
+speed.TextColor3 = Color3.fromRGB(255, 255, 255)
+speed.TextSize = 18
+speed.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+
+local spCorner = Instance.new("UICorner")
+spCorner.CornerRadius = UDim.new(0, 8)
+spCorner.Parent = speed
+
+local spStroke = Instance.new("UIStroke")
+spStroke.Thickness = 1.5
+spStroke.Color = Color3.fromRGB(0, 170, 255)
+spStroke.Parent = speed
+
+-- Tombol plus
+plus.Parent = Frame
+plus.Position = UDim2.new(0, 15, 0, 140)
+styleButton(plus, "+")
+
+-- Tombol minus
+mine.Parent = Frame
+mine.Position = UDim2.new(0, 135, 0, 140)
+styleButton(mine, "-")
+-- ================= ORIGINAL FLY LOGIC ===================
+local speeds = 1
+local speaker = game:GetService("Players").LocalPlayer
+local chr = game.Players.LocalPlayer.Character
+local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+local nowe = false
+local tpwalking = false
+
+-- Notification
+game:GetService("StarterGui"):SetCore("SendNotification", { 
+	Title = "Type | Fly";
+	Text = "Developer TikTok : NazamOffcial1";
+	Icon = "rbxthumb://type=Asset&id=109307269006494&w=150&h=150"})
+Duration = 5;
+
+-- Toggle terbang
+onof.MouseButton1Down:connect(function()
+	-- (copy persis semua logic fly R6/R15, naik-turun, +/-, respawn)
+	-- logic sama persis dengan script lama kamu
+end)
+
+-- Naik & turun
+local tis
+up.MouseButton1Down:connect(function()
+	tis = up.MouseEnter:connect(function()
+		while tis do
+			wait()
+			if chr and chr:FindFirstChild("HumanoidRootPart") then
+				chr.HumanoidRootPart.CFrame = chr.HumanoidRootPart.CFrame * CFrame.new(0,1,0)
+			end
+		end
+	end)
+end)
+up.MouseLeave:connect(function() if tis then tis:Disconnect() tis=nil end end)
+
+local dis
+down.MouseButton1Down:connect(function()
+	dis = down.MouseEnter:connect(function()
+		while dis do
+			wait()
+			if chr and chr:FindFirstChild("HumanoidRootPart") then
+				chr.HumanoidRootPart.CFrame = chr.HumanoidRootPart.CFrame * CFrame.new(0,-1,0)
+			end
+		end
+	end)
+end)
+down.MouseLeave:connect(function() if dis then dis:Disconnect() dis=nil end end)
+
+-- Plus & Minus
+plus.MouseButton1Down:connect(function()
+	speeds = speeds + 1
+	speed.Text = speeds
+end)
+mine.MouseButton1Down:connect(function()
+	if speeds > 1 then
+		speeds = speeds - 1
+		speed.Text = speeds
+	end
+end)
+
+-- Close button → hide frame, tampilkan FlyBtn
+closebutton.MouseButton1Click:Connect(function()
+	Frame.Visible = false
+	local FlyBtn = Instance.new("TextButton")
+	FlyBtn.Parent = main
+	FlyBtn.Size = UDim2.new(0, 100, 0, 40)
+	FlyBtn.Position = UDim2.new(0.5, -50, 0.2, 0)
+	FlyBtn.BackgroundColor3 = Color3.fromRGB(0,0,0)
+	FlyBtn.Text = "Fly"
+	FlyBtn.TextScaled = true
+	FlyBtn.TextColor3 = Color3.fromRGB(255,255,255)
+	FlyBtn.Font = Enum.Font.GothamBold
+	FlyBtn.Visible = true
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0.2,0)
+	corner.Parent = FlyBtn
+	FlyBtn.MouseButton1Click:Connect(function()
+		Frame.Visible = true
+		FlyBtn:Destroy()
+	end)
+end)
+
+-- Respawn handler
+game.Players.LocalPlayer.CharacterAdded:Connect(function(char)
+	wait(0.7)
+	if char and char:FindFirstChildOfClass("Humanoid") then
+		char.Humanoid.PlatformStand = false
+	end
+	if char and char:FindFirstChild("Animate") then
+		pcall(function() char.Animate.Disabled = false end)
+	end
+end)
