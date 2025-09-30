@@ -1,508 +1,242 @@
--- WVOX GUI (FINAL)
--- LocalScript (letakkan di StarterPlayerScripts atau PlayerGui)
 
--- Services
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local Lighting = game:GetService("Lighting")
+local main = Instance.new("ScreenGui")
+local Frame = Instance.new("Frame")
+local Title = Instance.new("TextLabel")
+local up = Instance.new("TextButton")
+local down = Instance.new("TextButton")
+local onof = Instance.new("TextButton")
+local plus = Instance.new("TextButton")
+local speed = Instance.new("TextLabel")
+local mine = Instance.new("TextButton")
+local closebutton = Instance.new("TextButton")
 
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+-- Parent GUI
+main.Name = "main"
+main.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+main.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+main.ResetOnSpawn = false
 
--- Helper: create instance
-local function new(inst, props)
-	local obj = Instance.new(inst)
-	if props then
-		for k,v in pairs(props) do obj[k] = v end
-	end
-	return obj
+-- Frame utama
+Frame.Parent = main
+Frame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+Frame.Size = UDim2.new(0, 250, 0, 180)
+Frame.Position = UDim2.new(0.1, 0, 0.3, 0)
+Frame.Active = true
+Frame.Draggable = true
+
+-- Rounded corner + stroke
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 12)
+UICorner.Parent = Frame
+
+local UIStroke = Instance.new("UIStroke")
+UIStroke.Thickness = 2
+UIStroke.Color = Color3.fromRGB(0, 170, 255)
+UIStroke.Parent = Frame
+
+-- Title
+Title.Parent = Frame
+Title.BackgroundTransparency = 1
+Title.Size = UDim2.new(1, -40, 0, 35)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "⚡ Fly | @NazamOfficial"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextSize = 20
+Title.TextXAlignment = Enum.TextXAlignment.Left
+Title.Position = UDim2.new(0, 10, 0, 0)
+
+-- Close button
+closebutton.Name = "Close"
+closebutton.Parent = Frame
+closebutton.Size = UDim2.new(0, 28, 0, 28)
+closebutton.Position = UDim2.new(1, -35, 0, 5)
+closebutton.BackgroundColor3 = Color3.fromRGB(255, 60, 60)
+closebutton.Text = "✕"
+closebutton.Font = Enum.Font.GothamBold
+closebutton.TextSize = 16
+closebutton.TextColor3 = Color3.fromRGB(255, 255, 255)
+
+local cornerClose = Instance.new("UICorner")
+cornerClose.CornerRadius = UDim.new(1, 0)
+cornerClose.Parent = closebutton
+
+-- Style tombol function
+local function styleButton(btn, text)
+	btn.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	btn.Size = UDim2.new(0, 100, 0, 35)
+	btn.Font = Enum.Font.GothamBold
+	btn.Text = text
+	btn.TextColor3 = Color3.fromRGB(255, 255, 255)
+	btn.TextSize = 16
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(0, 8)
+	corner.Parent = btn
+
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 1.5
+	stroke.Color = Color3.fromRGB(100, 100, 100)
+	stroke.Parent = btn
 end
 
--- Remove old GUI if exists
-if PlayerGui:FindFirstChild("WVOX_GUI") then
-	PlayerGui.WVOX_GUI:Destroy()
-end
+-- Tombol naik
+up.Parent = Frame
+up.Position = UDim2.new(0, 15, 0, 50)
+styleButton(up, "⬆ Naik")
 
--- SCREENGUI
-local screenGui = new("ScreenGui", { Name = "WVOX_GUI", Parent = PlayerGui, ZIndexBehavior = Enum.ZIndexBehavior.Sibling, ResetOnSpawn = false })
+-- Tombol turun
+down.Parent = Frame
+down.Position = UDim2.new(0, 15, 0, 95)
+styleButton(down, "⬇ Turun")
 
--- LOADING OVERLAY (full-screen)
-local loadingOverlay = new("Frame", {
-	Name = "LoadingOverlay",
-	Parent = screenGui,
-	AnchorPoint = Vector2.new(0.5,0.5),
-	Position = UDim2.new(0.5,0,0.5,0),
-	Size = UDim2.new(1,0,1,0),
-	BackgroundColor3 = Color3.fromRGB(0,0,0),
-	BackgroundTransparency = 0.4,
-	Visible = true,
-})
-local loadingCenter = new("Frame", {
-	Parent = loadingOverlay,
-	Size = UDim2.new(0.45,0,0,70),
-	Position = UDim2.new(0.5,0,0.5,-40),
-	AnchorPoint = Vector2.new(0.5,0.5),
-	BackgroundColor3 = Color3.fromRGB(25,25,25),
-	BackgroundTransparency = 0.1,
-})
-new("UICorner", { Parent = loadingCenter, CornerRadius = UDim.new(0,10) })
-local loadingLabel = new("TextLabel", {
-	Parent = loadingCenter,
-	Size = UDim2.new(1,-20,0,24),
-	Position = UDim2.new(0,10,0,6),
-	BackgroundTransparency = 1,
-	Text = "LOADING WVOX",
-	TextColor3 = Color3.fromRGB(255,255,255),
-	Font = Enum.Font.GothamBold,
-	TextSize = 18,
-	TextXAlignment = Enum.TextXAlignment.Center,
-})
-local loadingBarBack = new("Frame", {
-	Parent = loadingCenter,
-	Size = UDim2.new(0.9,0,0,14),
-	Position = UDim2.new(0.05,0,0,36),
-	BackgroundColor3 = Color3.fromRGB(40,40,40),
-})
-new("UICorner", { Parent = loadingBarBack, CornerRadius = UDim.new(0,8) })
-local loadingBarFill = new("Frame", {
-	Parent = loadingBarBack,
-	Size = UDim2.new(0,0,1,0),
-	Position = UDim2.new(0,0,0,0),
-	BackgroundColor3 = Color3.fromRGB(230,230,230),
-})
-new("UICorner", { Parent = loadingBarFill, CornerRadius = UDim.new(0,8) })
+-- Tombol terbang
+onof.Parent = Frame
+onof.Position = UDim2.new(0, 135, 0, 50)
+styleButton(onof, "🚀 Fly")
 
--- MAIN BG (16:9 but smaller)
-local targetSize = UDim2.new(0.5,0,0.28,0) -- ~16:9 aspect smaller
-local targetPos = UDim2.new(0.25,0,0.36,0)
-local bgFrame = new("Frame", {
-	Name = "BGFrame",
-	Parent = screenGui,
-	Size = UDim2.new(0,10,0,10), -- start tiny for appear animation
-	Position = UDim2.new(0.5,0,0.5,0),
-	AnchorPoint = Vector2.new(0.5,0.5),
-	BackgroundColor3 = Color3.fromRGB(20,20,20),
-	BackgroundTransparency = 0.2, -- slightly transparent but visible
-	Visible = false,
-	ClipsDescendants = true,
-})
-new("UICorner", { Parent = bgFrame, CornerRadius = UDim.new(0,12) })
-local bgStroke = new("UIStroke", { Parent = bgFrame, Color = Color3.fromRGB(40,40,40), Thickness = 1 })
+-- Speed label
+speed.Parent = Frame
+speed.Size = UDim2.new(0, 100, 0, 35)
+speed.Position = UDim2.new(0, 135, 0, 95)
+speed.Font = Enum.Font.GothamBold
+speed.Text = "1"
+speed.TextColor3 = Color3.fromRGB(255, 255, 255)
+speed.TextSize = 18
+speed.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
 
--- TOP BAR
-local topBar = new("Frame", {
-	Parent = bgFrame,
-	Size = UDim2.new(1,0,0,36),
-	Position = UDim2.new(0,0,0,0),
-	BackgroundColor3 = Color3.fromRGB(70,70,70),
-	BackgroundTransparency = 0.25,
-})
-new("UICorner", { Parent = topBar, CornerRadius = UDim.new(0,10) })
-local titleLabel = new("TextLabel", {
-	Parent = topBar,
-	BackgroundTransparency = 1,
-	Size = UDim2.new(1,-120,1,0),
-	Position = UDim2.new(0,12,0,0),
-	Text = "WVOX",
-	TextColor3 = Color3.fromRGB(245,245,245),
-	Font = Enum.Font.GothamBold,
-	TextSize = 20,
-	TextXAlignment = Enum.TextXAlignment.Left,
+local spCorner = Instance.new("UICorner")
+spCorner.CornerRadius = UDim.new(0, 8)
+spCorner.Parent = speed
+
+local spStroke = Instance.new("UIStroke")
+spStroke.Thickness = 1.5
+spStroke.Color = Color3.fromRGB(0, 170, 255)
+spStroke.Parent = speed
+
+-- Tombol plus
+plus.Parent = Frame
+plus.Position = UDim2.new(0, 15, 0, 140)
+styleButton(plus, "+")
+
+-- Tombol minus
+mine.Parent = Frame
+mine.Position = UDim2.new(0, 135, 0, 140)
+styleButton(mine, "-")
+
+---------------------------------------------------
+-- Bagian logic Fly
+---------------------------------------------------
+local speeds = 1
+local speaker = game:GetService("Players").LocalPlayer
+local chr = game.Players.LocalPlayer.Character
+local hum = chr and chr:FindFirstChildWhichIsA("Humanoid")
+local nowe = false
+local tpwalking = false
+
+-- Notification
+game:GetService("StarterGui"):SetCore("SendNotification", { 
+	Title = "Type | Fly";
+	Text = "Developer TikTok : NazamOffcial1";
+	Icon = "rbxthumb://type=Asset&id=109307269006494&w=150&h=150";
+	Duration = 5;
 })
 
--- Controls (Play & X)
-local playBtn = new("TextButton", {
-	Parent = topBar,
-	Size = UDim2.new(0,44,0,28),
-	Position = UDim2.new(1,-100,0,4),
-	BackgroundColor3 = Color3.fromRGB(15,15,15),
-	BackgroundTransparency = 0,
-	Text = "▶",
-	TextColor3 = Color3.fromRGB(255,255,255),
-	Font = Enum.Font.GothamBold,
-	TextSize = 18,
-})
-new("UICorner", { Parent = playBtn, CornerRadius = UDim.new(0,8) })
-
-local closeBtn = new("TextButton", {
-	Parent = topBar,
-	Size = UDim2.new(0,44,0,28),
-	Position = UDim2.new(1,-50,0,4),
-	BackgroundColor3 = Color3.fromRGB(15,15,15),
-	Text = "X",
-	TextColor3 = Color3.fromRGB(255,255,255),
-	Font = Enum.Font.GothamBold,
-	TextSize = 18,
-})
-new("UICorner", { Parent = closeBtn, CornerRadius = UDim.new(0,8) })
-
--- Body: left (8 buttons) and right (dynamic)
-local contentFrame = new("Frame", {
-	Parent = bgFrame,
-	Size = UDim2.new(1,0,1,-36),
-	Position = UDim2.new(0,0,0,36),
-	BackgroundTransparency = 1,
-})
--- left
-local leftFrame = new("Frame", {
-	Parent = contentFrame,
-	Size = UDim2.new(0.33,0,1,0),
-	Position = UDim2.new(0,0,0,0),
-	BackgroundTransparency = 1,
-})
-local leftLayout = new("UIListLayout", { Parent = leftFrame, Padding = UDim.new(0,10), FillDirection = Enum.FillDirection.Vertical })
-leftLayout.SortOrder = Enum.SortOrder.LayoutOrder
-leftLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
-
--- create 8 left buttons
-local leftButtons = {}
-for i=1,8 do
-	local btn = new("TextButton", {
-		Parent = leftFrame,
-		Size = UDim2.new(0.9,0,0,40),
-		Position = UDim2.new(0.05,0,0, (i-1)*50 + 8),
-		BackgroundColor3 = Color3.fromRGB(60,60,60),
-		BackgroundTransparency = 0.25,
-		Text = "FITUR "..i,
-		TextColor3 = Color3.fromRGB(255,255,255),
-		Font = Enum.Font.Gotham,
-		TextSize = 18,
-		AutoButtonColor = true,
-	})
-	new("UICorner", { Parent = btn, CornerRadius = UDim.new(0,8) })
-	btn.LayoutOrder = i
-	leftButtons[i] = btn
-end
-
--- right
-local rightFrame = new("Frame", {
-	Parent = contentFrame,
-	Size = UDim2.new(0.67,0,1,0),
-	Position = UDim2.new(0.33,0,0,0),
-	BackgroundTransparency = 1,
-})
-local rightGrid = new("UIGridLayout", {
-	Parent = rightFrame,
-	CellSize = UDim2.new(0.18,0,0,40),
-	CellPadding = UDim2.new(0.02,0,0.02,0),
-	FillDirection = Enum.FillDirection.Horizontal,
-	SortOrder = Enum.SortOrder.LayoutOrder,
-	HorizontalAlignment = Enum.HorizontalAlignment.Left,
-	VerticalAlignment = Enum.VerticalAlignment.Top,
-})
-rightGrid.Parent = rightFrame
-
--- create 40 right buttons (5 columns x up to 8 rows)
-local rightButtons = {}
-for i=1,40 do
-	local btn = new("TextButton", {
-		Parent = rightFrame,
-		Size = UDim2.new(0.18,0,0,40),
-		BackgroundColor3 = Color3.fromRGB(60,60,60),
-		BackgroundTransparency = 0.25,
-		TextColor3 = Color3.fromRGB(255,255,255),
-		Font = Enum.Font.Gotham,
-		TextSize = 16,
-		AutoButtonColor = true,
-		Visible = false,
-	})
-	new("UICorner", { Parent = btn, CornerRadius = UDim.new(0,8) })
-	btn.LayoutOrder = i
-	rightButtons[i] = btn
-end
-
--- mapping names
-local rightButtonMapping = {
-	{ "BAHAN FITUR 1","BAHAN FITUR 2","BAHAN FITUR 3","BAHAN FITUR 4","BAHAN FITUR 5" },
-	{ "BAHAN FITUR 6","BAHAN FITUR 7","BAHAN FITUR 8","BAHAN FITUR 9","BAHAN FITUR 10" },
-	{ "BAHAN FITUR 11","BAHAN FITUR 12","BAHAN FITUR 13","BAHAN FITUR 14","BAHAN FITUR 15" },
-	{ "BAHAN FITUR 16","BAHAN FITUR 17","BAHAN FITUR 18","BAHAN FITUR 19","BAHAN FITUR 20" },
-	{ "BAHAN FITUR 21","BAHAN FITUR 22","BAHAN FITUR 23","BAHAN FITUR 24","BAHAN FITUR 25" },
-	{ "BAHAN FITUR 26","BAHAN FITUR 27","BAHAN FITUR 28","BAHAN FITUR 29","BAHAN FITUR 30" },
-	{ "BAHAN FITUR 31","BAHAN FITUR 32","BAHAN FITUR 33","BAHAN FITUR 34","BAHAN FITUR 35" },
-	{ "BAHAN FITUR 36","BAHAN FITUR 37","BAHAN FITUR 38","BAHAN FITUR 39","BAHAN FITUR 40" },
-}
-
--- function to show 5 buttons for left index i (1..8)
-local function showRightButtonsFor(i)
-	-- hide all first with tween
-	for idx,btn in ipairs(rightButtons) do
-		if btn.Visible then
-			local t = TweenService:Create(btn, TweenInfo.new(0.18), {BackgroundTransparency = 1, TextTransparency = 1})
-			t:Play()
-			t.Completed:Connect(function()
-				btn.Visible = false
-			end)
+-- Fungsi Fly
+local function Fly()
+	repeat wait()
+		if not chr or not chr:FindFirstChild("HumanoidRootPart") then continue end
+		local hrp = chr:FindFirstChild("HumanoidRootPart")
+		local cam = workspace.CurrentCamera
+		local moveDir = Vector3.new()
+		if game.UserInputService:IsKeyDown(Enum.KeyCode.W) then
+			moveDir = moveDir + cam.CFrame.LookVector
 		end
-	end
-
-	-- show mapped 5 after tiny delay
-	task.wait(0.12)
-	local mapping = rightButtonMapping[i] or {}
-	for j=1,5 do
-		local globalIdx = (i-1)*5 + j
-		local btn = rightButtons[globalIdx]
-		if btn then
-			btn.Text = mapping[j] or ("BAHAN "..globalIdx)
-			btn.BackgroundTransparency = 1
-			btn.TextTransparency = 1
-			btn.Visible = true
-			local t = TweenService:Create(btn, TweenInfo.new(0.22, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {BackgroundTransparency = 0.25, TextTransparency = 0})
-			t:Play()
+		if game.UserInputService:IsKeyDown(Enum.KeyCode.S) then
+			moveDir = moveDir - cam.CFrame.LookVector
 		end
-	end
-end
-
--- X button hides menu shows FK "pill" object
--- Create FK object (pill-shaped)
-local fkObj = new("TextButton", {
-	Parent = screenGui,
-	Size = UDim2.new(0,140,0,45), -- pill shape
-	Position = UDim2.new(0.92,0,0.9,0),
-	AnchorPoint = Vector2.new(0.5,0.5),
-	BackgroundColor3 = Color3.fromRGB(0,0,0),
-	Text = "FK",
-	TextColor3 = Color3.fromRGB(255,255,255),
-	Visible = false,
-	AutoButtonColor = true,
-})
-new("UICorner", { Parent = fkObj, CornerRadius = UDim.new(1,0) })
-fkObj.Active = true
-
--- Drag implementation for fkObj
-do
-	local dragging, dragInput, dragStart, startPos
-	fkObj.InputBegan:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-			dragging = true
-			dragStart = input.Position
-			startPos = fkObj.Position
-
-			input.Changed:Connect(function()
-				if input.UserInputState == Enum.UserInputState.End then
-					dragging = false
-				end
-			end)
+		if game.UserInputService:IsKeyDown(Enum.KeyCode.A) then
+			moveDir = moveDir - cam.CFrame.RightVector
 		end
-	end)
-	fkObj.InputChanged:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
-			dragInput = input
+		if game.UserInputService:IsKeyDown(Enum.KeyCode.D) then
+			moveDir = moveDir + cam.CFrame.RightVector
 		end
-	end)
-	UserInputService.InputChanged:Connect(function(input)
-		if input == dragInput and dragging and dragStart and startPos then
-			local delta = input.Position - dragStart
-			fkObj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+		if game.UserInputService:IsKeyDown(Enum.KeyCode.Space) then
+			moveDir = moveDir + Vector3.new(0,1,0)
 		end
-	end)
+		if game.UserInputService:IsKeyDown(Enum.KeyCode.LeftShift) then
+			moveDir = moveDir - Vector3.new(0,1,0)
+		end
+		hrp.Velocity = moveDir * (speeds * 20)
+	until not nowe
 end
 
--- Blur effect: create once and enable/disable
-local blur
-do
-	blur = Lighting:FindFirstChild("WVOX_Blur")
-	if not blur then
-		blur = Instance.new("BlurEffect")
-		blur.Name = "WVOX_Blur"
-		blur.Parent = Lighting
-		blur.Size = 0
-		blur.Enabled = false
-	end
-end
-
-local function enableBlur()
-	pcall(function()
-		blur.Enabled = true
-		TweenService:Create(blur, TweenInfo.new(0.4, Enum.EasingStyle.Quad), {Size = 12}):Play()
-	end)
-end
-local function disableBlur()
-	pcall(function()
-		TweenService:Create(blur, TweenInfo.new(0.25, Enum.EasingStyle.Quad), {Size = 0}):Play()
-		task.delay(0.26, function() blur.Enabled = false end)
-	end)
-end
-
--- SOUND (replace SOUND_ID_HERE with an actual asset id)
-local sound = new("Sound", screenGui)
-sound.SoundId = "rbxassetid://SOUND_ID_HERE" -- <-- ganti ID di sini
-sound.Looped = true
-local musicPlaying = false
-
-playBtn.MouseButton1Click:Connect(function()
-	musicPlaying = not musicPlaying
-	if musicPlaying then
-		pcall(function() sound:Play() end)
-		playBtn.Text = "⏸"
+-- Button function
+onof.MouseButton1Click:Connect(function()
+	nowe = not nowe
+	if nowe then
+		Fly()
 	else
-		pcall(function() sound:Pause() end)
-		playBtn.Text = "▶"
+		if chr and chr:FindFirstChild("HumanoidRootPart") then
+			chr.HumanoidRootPart.Velocity = Vector3.new(0,0,0)
+		end
 	end
 end)
 
--- closeBtn behavior: hide menu, show FK pill, disable blur
-closeBtn.MouseButton1Click:Connect(function()
-	-- hide main bg
-	bgFrame.Visible = false
-	fkObj.Visible = true
-	disableBlur()
+plus.MouseButton1Click:Connect(function()
+	speeds = speeds + 1
+	speed.Text = tostring(speeds)
 end)
 
--- clicking fkObj will re-open menu
-fkObj.MouseButton1Click:Connect(function()
-	fkObj.Visible = false
-	bgFrame.Visible = true
-	enableBlur()
-	-- animate entrance
-	bgFrame.BackgroundTransparency = 1
-	bgFrame.Position = UDim2.new(0.5,0,0.5,0)
-	local tween = TweenService:Create(bgFrame, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = targetSize, Position = targetPos, BackgroundTransparency = 0.2})
-	bgFrame.Visible = true
-	tween:Play()
+mine.MouseButton1Click:Connect(function()
+	if speeds > 1 then
+		speeds = speeds - 1
+		speed.Text = tostring(speeds)
+	end
 end)
 
--- LEFT button clicks: show right group
-for i,btn in ipairs(leftButtons) do
-	btn.MouseButton1Click:Connect(function()
-		-- click animation (scale)
-		local s1 = TweenService:Create(btn, TweenInfo.new(0.08), {Size = UDim2.new(btn.Size.X.Scale, btn.Size.X.Offset, btn.Size.Y.Scale, btn.Size.Y.Offset - 4)})
-		local s2 = TweenService:Create(btn, TweenInfo.new(0.12), {Size = UDim2.new(btn.Size.X.Scale, btn.Size.X.Offset, btn.Size.Y.Scale, btn.Size.Y.Offset)})
-		s1:Play(); s1.Completed:Wait(); s2:Play()
-		-- show mapped right buttons
-		showRightButtonsFor(i)
+up.MouseButton1Down:Connect(function()
+	if chr and chr:FindFirstChild("HumanoidRootPart") then
+		chr.HumanoidRootPart.Velocity = Vector3.new(0, speeds * 20, 0)
+	end
+end)
+
+down.MouseButton1Down:Connect(function()
+	if chr and chr:FindFirstChild("HumanoidRootPart") then
+		chr.HumanoidRootPart.Velocity = Vector3.new(0, -speeds * 20, 0)
+	end
+end)
+
+-- Close → FlyBtn
+closebutton.MouseButton1Click:Connect(function()
+	Frame.Visible = false
+
+	local FlyBtn = Instance.new("TextButton")
+	FlyBtn.Parent = main
+	FlyBtn.Size = UDim2.new(0, 60, 0, 60)
+	FlyBtn.Position = UDim2.new(0.05, 0, 0.6, 0)
+	FlyBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+	FlyBtn.Text = "⚡"
+	FlyBtn.Font = Enum.Font.GothamBold
+	FlyBtn.TextSize = 30
+	FlyBtn.TextColor3 = Color3.fromRGB(0, 170, 255)
+
+	local corner = Instance.new("UICorner")
+	corner.CornerRadius = UDim.new(1, 0)
+	corner.Parent = FlyBtn
+
+	local stroke = Instance.new("UIStroke")
+	stroke.Thickness = 2
+	stroke.Color = Color3.fromRGB(0, 170, 255)
+	stroke.Parent = FlyBtn
+
+	FlyBtn.MouseButton1Click:Connect(function()
+		Frame.Visible = true
+		FlyBtn:Destroy()
 	end)
-end
-
--- Show/hide initial state and entrance animation when GUI first loads
-local function enterMainUI()
-	-- start blurred background slightly visible
-	loadingOverlay.Visible = true
-	bgFrame.Visible = false
-	-- animate loading bar fill
-	local fillTween = TweenService:Create(loadingBarFill, TweenInfo.new(2.0, Enum.EasingStyle.Quad), {Size = UDim2.new(1,0,1,0)})
-	fillTween:Play()
-	fillTween.Completed:Wait()
-	-- fade out loading and show menu (with blur)
-	local fade = TweenService:Create(loadingOverlay, TweenInfo.new(0.35), {BackgroundTransparency = 1})
-	fade:Play()
-	fade.Completed:Wait()
-	loadingOverlay.Visible = false
-
-	-- show menu with blur
-	enableBlur()
-	bgFrame.Visible = true
-	bgFrame.Size = UDim2.new(0,10,0,10)
-	bgFrame.Position = UDim2.new(0.5,0,0.5,0)
-	local tween = TweenService:Create(bgFrame, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Size = targetSize, Position = targetPos, BackgroundTransparency = 0.2})
-	tween:Play()
-end
-
--- EXAMPLE ACTIONS (isi sesuai kebutuhanmu)
--- You can change these functions to perform whatever local actions you want.
-local rightButtonActions = {}
-
--- helper: simple notification
-local function notify(title, text)
-	pcall(function()
-		game:GetService("StarterGui"):SetCore("SendNotification", {
-			Title = title or "WVOX",
-			Text = text or "",
-			Duration = 3
-		})
-	end)
-end
-
--- Example: some actions for first 10 buttons
-rightButtonActions[1] = function()
-	notify("BAHAN FITUR 1", "Contoh notifikasi: BAHAN FITUR 1 diklik.")
-end
-
-rightButtonActions[2] = function()
-	notify("BAHAN FITUR 2", "Contoh: Melakukan satu kali Jump (lokal).")
-	local char = LocalPlayer.Character
-	if char and char:FindFirstChild("Humanoid") then
-		char.Humanoid.Jump = true
-	end
-end
-
-rightButtonActions[3] = function()
-	-- increase walkspeed locally + notify
-	local char = LocalPlayer.Character
-	if char and char:FindFirstChild("Humanoid") then
-		local hum = char.Humanoid
-		hum.WalkSpeed = (hum.WalkSpeed or 16) + 8
-		notify("Speed Up", "WalkSpeed +8 (lokal).")
-		-- reset after 5s
-		delay(5, function()
-			if hum and hum.Parent then
-				hum.WalkSpeed = 16
-			end
-		end)
-	end
-end
-
-rightButtonActions[4] = function()
-	-- decrease walkspeed
-	local char = LocalPlayer.Character
-	if char and char:FindFirstChild("Humanoid") then
-		char.Humanoid.WalkSpeed = math.max(6, (char.Humanoid.WalkSpeed or 16) - 6)
-		notify("Speed Down", "WalkSpeed decreased (lokal).")
-	end
-end
-
-rightButtonActions[5] = function()
-	-- teleport local player to a nearby point (example offset)
-	local char = LocalPlayer.Character
-	if char and char:FindFirstChild("HumanoidRootPart") then
-		local root = char.HumanoidRootPart
-		root.CFrame = root.CFrame + Vector3.new(0,5,0)
-		notify("Teleport", "Move up a little (example).")
-	end
-end
-
-rightButtonActions[6] = function()
-	notify("BAHAN FITUR 6", "Contoh action kosong, ganti sesuai kebutuhan.")
-end
-rightButtonActions[7] = function() notify("BAHAN FITUR 7", "Contoh action kosong.") end
-rightButtonActions[8] = function() notify("BAHAN FITUR 8", "Contoh action kosong.") end
-rightButtonActions[9] = function() notify("BAHAN FITUR 9", "Contoh action kosong.") end
-rightButtonActions[10] = function() notify("BAHAN FITUR 10", "Contoh action kosong.") end
--- rest default placeholder
-for i=11,40 do
-	rightButtonActions[i] = function()
-		notify("BAHAN FITUR "..i, "Belum diisi. Tambahkan fungsi pada script.")
-	end
-end
-
--- wire up right button clicks to actions
-for i,btn in ipairs(rightButtons) do
-	btn.MouseButton1Click:Connect(function()
-		-- small click animation
-		local t1 = TweenService:Create(btn, TweenInfo.new(0.07), {Size = UDim2.new(btn.Size.X.Scale, btn.Size.X.Offset, btn.Size.Y.Scale, btn.Size.Y.Offset - 4)})
-		local t2 = TweenService:Create(btn, TweenInfo.new(0.09), {Size = UDim2.new(btn.Size.X.Scale, btn.Size.X.Offset, btn.Size.Y.Scale, btn.Size.Y.Offset)})
-		t1:Play(); t1.Completed:Wait(); t2:Play()
-		-- call action safely
-		pcall(function()
-			local f = rightButtonActions[i]
-			if type(f) == "function" then f() end
-		end)
-	end)
-end
-
--- Start up sequence
-spawn(enterMainUI)
-
--- Ensure GUI re-opens on respawn etc.
-LocalPlayer.CharacterAdded:Connect(function()
-	-- no changes forced to character here; GUI stays in playergui
 end)
 
--- OPTIONAL: expose table so you can edit actions at runtime (dev console)
-_G.WVOX_RightActions = rightButtonActions
-_G.WVOX_ShowRightFor = showRightButtonsFor
-_G.WVOX_Notify = notify
-
--- End of script
+-- Respawn handler
+game.Players.LocalPlayer.CharacterAdded:Connect(function(c)
+	chr = c
+	hum = chr:WaitForChild("Humanoid")
+end)
